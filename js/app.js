@@ -10,6 +10,7 @@ import { homePage } from './pages/home.js';
 import { signupPage, loginPage, forgotPage, resetPage } from './pages/auth-pages.js';
 import { dashboardPage } from './pages/dashboard.js';
 import { programPage, programDayPage } from './pages/program.js';
+import { sessionPage } from './pages/session.js';
 
 // ---------- Les pages ----------
 route('/', homePage);
@@ -20,6 +21,7 @@ route('/nouveau-mot-de-passe', resetPage);
 route('/tableau-de-bord', dashboardPage, { auth: true });
 route('/programme', programPage);
 route('/programme/:jour', programDayPage);
+route('/seance/:jour', sessionPage, { auth: true });
 setNotFound(() => mount(html`
   <div class="container dash center">
     <h1>${t('common.not_found_title')}</h1>
@@ -78,7 +80,7 @@ async function start() {
     renderNav();
     if (event === 'PASSWORD_RECOVERY') navigate('/nouveau-mot-de-passe');
     // Si l'utilisateur se déconnecte sur une page privée, on le renvoie à l'accueil
-    if (event === 'SIGNED_OUT' && currentPath() === '/tableau-de-bord') navigate('/');
+    if (event === 'SIGNED_OUT' && (currentPath() === '/tableau-de-bord' || currentPath().startsWith('/seance'))) navigate('/');
   });
 
   if (!isConfigured) {

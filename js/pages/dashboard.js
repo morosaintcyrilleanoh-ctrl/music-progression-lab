@@ -70,7 +70,7 @@ export async function dashboardPage() {
               ${t('dashboard.day_label', { n: currentDayNumber, total })} · ${t('dashboard.duration', { n: today?.duration_minutes ?? 15 })}
             </p>`}
         </div>
-        ${finished ? '' : html`<a class="btn btn-lg" style="background:#fff;color:#1e1b4b" href="#/programme/${currentDayNumber}">${t('dashboard.start')} →</a>`}
+        ${finished ? '' : html`<a class="btn btn-lg" style="background:#fff;color:#1e1b4b" href="#/seance/${currentDayNumber}">${t('dashboard.start')} →</a>`}
       </section>
 
       <section class="grid grid-4" aria-label="Statistiques">

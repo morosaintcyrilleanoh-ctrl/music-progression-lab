@@ -85,8 +85,8 @@ export async function programDayPage({ jour }) {
       </div>
 
       <section class="card card-highlight">
-        <button class="btn btn-lg btn-block" type="button" disabled aria-describedby="soon-note">${t('program.start_soon')}</button>
-        <p id="soon-note" class="small" style="margin:12px 0 0;color:#e0e7ff">${t('program.soon_note')}</p>
+        <a class="btn btn-lg btn-block" style="background:#fff;color:#1e1b4b" href="#/seance/${day.day_number}">▶ ${t('program.start_session')}</a>
+        <p class="small" style="margin:12px 0 0;color:#e0e7ff">${t('program.start_note')}</p>
       </section>
     </article>`);
 }

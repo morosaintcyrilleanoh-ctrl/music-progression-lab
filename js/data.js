@@ -83,3 +83,74 @@ export async function countUserBadges(userId) {
   if (error) throw error;
   return count ?? 0;
 }
+
+// ---------------------------------------------------------------------
+// Séances d'entraînement
+// ---------------------------------------------------------------------
+export async function getDayExercises(programDayId) {
+  const rows = check(await supabase
+    .from('program_day_exercises')
+    .select('sort_order, params_override, exercise:exercises(id, slug, skill_id, type, title, objective, instructions, explanation, params, requires_mic)')
+    .eq('program_day_id', programDayId)
+    .order('sort_order'));
+  return rows
+    .filter((r) => r.exercise)
+    .map((r) => ({ ...r.exercise, params: { ...(r.exercise.params ?? {}), ...(r.params_override ?? {}) } }));
+}
+
+export async function getExerciseBySlug(slug) {
+  return check(await supabase
+    .from('exercises')
+    .select('id, slug, skill_id, type, title, objective, instructions, explanation, params, requires_mic')
+    .eq('slug', slug)
+    .maybeSingle());
+}
+
+export async function startSession(programDayId) {
+  return check(await supabase.rpc('start_session', { p_program_day_id: programDayId }));
+}
+
+export async function recordAttempt(sessionId, exerciseId, item) {
+  return check(await supabase.rpc('record_attempt', {
+    p_exercise_id: exerciseId,
+    p_session_id: sessionId,
+    p_is_correct: !!item.is_correct,
+    p_score: Math.max(0, Math.min(1, Number(item.score) || 0)),
+    p_expected: item.expected ?? null,
+    p_answer: item.answer ?? null,
+    p_error_type: item.error_type ?? null,
+    p_cents_offset: item.cents_offset ?? null,
+    p_response_ms: item.response_ms ?? null,
+    p_used_mic: !!item.used_mic
+  }));
+}
+
+export async function completeSession(sessionId, { score = null, notebook = null, validated = true } = {}) {
+  return check(await supabase.rpc('complete_session', {
+    p_session_id: sessionId,
+    p_score: score,
+    p_notebook: notebook,
+    p_validated: validated
+  }));
+}
+
+export async function getBadgesSince(userId, sinceIso) {
+  return check(await supabase
+    .from('user_achievements')
+    .select('earned_at, achievement:achievements(title, description)')
+    .eq('user_id', userId)
+    .gte('earned_at', sinceIso));
+}
+
+// Meilleur score d'une séance validée pour un jour donné (pour comparer jour 1 / jour 7)
+export async function getBestDayScore(userId, programDayId) {
+  const rows = check(await supabase
+    .from('practice_sessions')
+    .select('score')
+    .eq('user_id', userId)
+    .eq('program_day_id', programDayId)
+    .eq('completed', true)
+    .order('score', { ascending: false, nullsFirst: false })
+    .limit(1));
+  return rows[0]?.score ?? null;
+}
