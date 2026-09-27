@@ -8,6 +8,7 @@ import { getUser } from '../auth.js';
 import { unlockAudio, audioSupported } from '../audio.js';
 import { voiceBase } from '../music.js';
 import { registry } from '../exercises/index.js';
+import { stopMic } from '../pitch.js';
 import { set } from '../exercises/common.js';
 import {
   getProgramDay, getDayExercises, getProfile, getUserProgram, updateVoiceRange, getExerciseBySlug,
@@ -129,7 +130,7 @@ async function runSession({ user, day, program, exercises, sessionId, voice, xpB
   };
 
   for (let i = 0; i < exercises.length; i++) {
-    if (!document.contains(stage)) return; // l'utilisateur a quitté la page
+    if (!document.contains(stage)) { stopMic(); return; } // l'utilisateur a quitté la page
     const exercise = exercises[i];
     const module = registry[exercise.type];
     stepEl.textContent = t('session.step', { n: i + 1, total: exercises.length });
@@ -156,6 +157,7 @@ async function runSession({ user, day, program, exercises, sessionId, voice, xpB
     if (r.selfCheck) b.selfCheck = true;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
+  stopMic(); // on coupe le micro dès la fin des exercices
   if (!document.contains(stage)) return;
   barEl.style.width = '100%';
 
