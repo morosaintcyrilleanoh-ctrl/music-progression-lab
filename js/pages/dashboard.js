@@ -2,7 +2,9 @@
 import { html, mount, toast } from '../ui.js';
 import { t } from '../i18n.js';
 import { getUser } from '../auth.js';
+import { pickSkills } from './personal.js';
 import {
+  getLastDiagnostic, getSkillScores, getVisibleAssignments, getMyAssignmentProgress, getMyRecommendations,
   getProfile, getStarterProgram, getUserProgram, getSkillsWithScores,
   getLevels, countUserBadges, updateVoiceRange, DASHBOARD_SKILLS
 } from '../data.js';
@@ -73,6 +75,8 @@ export async function dashboardPage() {
         ${finished ? '' : html`<a class="btn btn-lg" style="background:#fff;color:#1e1b4b" href="#/seance/${currentDayNumber}">${t('dashboard.start')} →</a>`}
       </section>
 
+      <div id="dash-extra" class="grid grid-2"></div>
+
       <section class="grid grid-4" aria-label="Statistiques">
         <div class="card">
           <div class="stat-label">${t('dashboard.progress')}</div>
@@ -125,4 +129,48 @@ export async function dashboardPage() {
       }
     });
   });
+
+  loadExtras(user, profile);
+}
+
+// Cartes complémentaires : diagnostic, entraînement personnalisé, devoirs, messages, espace formateur
+async function loadExtras(user, profile) {
+  const zone = document.getElementById('dash-extra');
+  if (!zone) return;
+  const [diag, scores, assignments, progress, messages] = await Promise.all([
+    getLastDiagnostic(user.id).catch(() => null),
+    getSkillScores(user.id).catch(() => []),
+    getVisibleAssignments().catch(() => []),
+    getMyAssignmentProgress(user.id).catch(() => []),
+    getMyRecommendations().catch(() => [])
+  ]);
+  if (!document.contains(zone)) return;
+  const names = t('stats.skill_names');
+  const done = new Set(progress.map((p) => p.assignment_id));
+  const todo = assignments.filter((a) => a.trainer_id !== user.id && !done.has(a.id)).length;
+  const unread = messages.filter((m) => !m.read_at).length;
+  const skills = pickSkills(scores.map((s) => ({ ...s, score: Number(s.score) })));
+  const staff = profile?.role === 'trainer' || profile?.role === 'admin';
+
+  zone.innerHTML = String(html`
+    ${diag ? '' : html`<section class="card card-accent">
+      <h2 style="font-size:1.1rem">🎯 ${t('dashboard.diag_title')}</h2>
+      <p class="muted">${t('dashboard.diag_text')}</p>
+      <a class="btn btn-sm" href="#/diagnostic">${t('diag.start')}</a></section>`}
+    <section class="card">
+      <h2 style="font-size:1.1rem">🧠 ${t('train.title')}</h2>
+      <p class="muted">${scores.length ? t('dashboard.train_text', { skills: skills.map((s) => names[s.skill_id]).join(', ') }) : t('dashboard.train_empty')}</p>
+      <a class="btn btn-sm" href="#/entrainement">${t('train.start')}</a></section>
+    <section class="card">
+      <h2 style="font-size:1.1rem">📚 ${t('nav.course')}</h2>
+      <p class="muted">${todo || unread ? t('dashboard.course_text', { todo, unread }) : t('dashboard.course_empty')}</p>
+      <a class="btn btn-sm btn-ghost" href="#/cours">${t('dashboard.open_course')}</a></section>
+    ${staff ? html`<section class="card">
+      <h2 style="font-size:1.1rem">🎓 ${t('nav.trainer')}</h2>
+      <p class="muted">${t('dashboard.trainer_text')}</p>
+      <a class="btn btn-sm btn-ghost" href="#/formateur">${t('dashboard.open_trainer')}</a></section>` : ''}
+    ${diag ? html`<section class="card">
+      <h2 style="font-size:1.1rem">📊 ${t('nav.stats')}</h2>
+      <p class="muted">${t('dashboard.stats_text')}</p>
+      <div class="row"><a class="btn btn-sm btn-ghost" href="#/statistiques">${t('dashboard.open_stats')}</a><a class="btn btn-sm btn-ghost" href="#/diagnostic/resultat">${t('diag.see_last')}</a></div></section>` : ''}`);
 }
