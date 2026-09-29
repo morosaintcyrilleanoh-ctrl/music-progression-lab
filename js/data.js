@@ -154,3 +154,152 @@ export async function getBestDayScore(userId, programDayId) {
     .limit(1));
   return rows[0]?.score ?? null;
 }
+
+// ---------------------------------------------------------------------
+// Statistiques
+// ---------------------------------------------------------------------
+export async function getRecentAttempts(userId, days = 60) {
+  const since = new Date(Date.now() - days * 86400000).toISOString();
+  return check(await supabase
+    .from('attempts')
+    .select('skill_id, is_correct, score, error_type, cents_offset, used_mic, created_at, exercise_id')
+    .eq('user_id', userId)
+    .gte('created_at', since)
+    .order('created_at', { ascending: false })
+    .limit(3000));
+}
+
+export async function getRecentSessions(userId, days = 60) {
+  const since = new Date(Date.now() - days * 86400000).toISOString();
+  return check(await supabase
+    .from('practice_sessions')
+    .select('id, started_at, duration_seconds, score, completed, program_day_id')
+    .eq('user_id', userId)
+    .gte('started_at', since)
+    .order('started_at', { ascending: false })
+    .limit(500));
+}
+
+export async function getSkillScores(userId) {
+  return check(await supabase.from('skill_scores').select('*').eq('user_id', userId));
+}
+
+export async function getExercisesList() {
+  return check(await supabase
+    .from('exercises')
+    .select('id, slug, skill_id, type, title, objective, instructions, explanation, params, requires_mic')
+    .eq('is_published', true)
+    .order('title'));
+}
+
+// ---------------------------------------------------------------------
+// Diagnostic
+// ---------------------------------------------------------------------
+export async function getLastDiagnostic(userId) {
+  const rows = check(await supabase
+    .from('diagnostics').select('*').eq('user_id', userId).order('taken_at', { ascending: false }).limit(1));
+  return rows[0] ?? null;
+}
+
+export async function saveDiagnostic(userId, results, recommendedProgramId) {
+  return check(await supabase.from('diagnostics')
+    .insert({ user_id: userId, results, recommended_program_id: recommendedProgramId }).select().single());
+}
+
+// ---------------------------------------------------------------------
+// Élève : formateur, ressources, devoirs, messages
+// ---------------------------------------------------------------------
+export async function joinTrainer(code) {
+  return check(await supabase.rpc('join_trainer', { p_code: code }));
+}
+export async function getMyTrainers() {
+  return check(await supabase.rpc('my_trainers'));
+}
+export async function getMyRecommendations() {
+  return check(await supabase.rpc('my_recommendations'));
+}
+export async function markRecommendationRead(id) {
+  return check(await supabase.rpc('mark_recommendation_read', { p_id: id }));
+}
+export async function getVisibleResources() {
+  return check(await supabase.from('resources').select('*').order('created_at', { ascending: false }));
+}
+export async function getVisibleAssignments() {
+  return check(await supabase
+    .from('assignments')
+    .select('*, exercise:exercises(id, slug, title, type, skill_id, instructions, explanation, objective, params, requires_mic), resource:resources(id, kind, title, storage_path, url, body)')
+    .order('created_at', { ascending: false }));
+}
+export async function getAssignment(id) {
+  return check(await supabase
+    .from('assignments')
+    .select('*, exercise:exercises(id, slug, title, type, skill_id, instructions, explanation, objective, params, requires_mic), resource:resources(id, kind, title, storage_path, url, body)')
+    .eq('id', id)
+    .maybeSingle());
+}
+export async function getMyAssignmentProgress(userId) {
+  return check(await supabase.from('assignment_progress').select('*').eq('student_id', userId));
+}
+export async function completeAssignment(id, score = null, comment = null) {
+  return check(await supabase.rpc('complete_assignment', { p_assignment: id, p_score: score, p_comment: comment }));
+}
+export async function getFileUrl(path) {
+  const { data, error } = await supabase.storage.from('resources').createSignedUrl(path, 3600);
+  if (error) throw error;
+  return data.signedUrl;
+}
+
+// ---------------------------------------------------------------------
+// Formateur
+// ---------------------------------------------------------------------
+export async function getTrainerCode() {
+  return check(await supabase.rpc('get_trainer_code'));
+}
+export async function getStudentList() {
+  return check(await supabase.rpc('staff_student_list'));
+}
+export async function getMyResources(trainerId) {
+  return check(await supabase.from('resources').select('*').eq('trainer_id', trainerId).order('created_at', { ascending: false }));
+}
+export async function uploadResourceFile(trainerId, file) {
+  const ext = (file.name.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const path = `${trainerId}/${crypto.randomUUID()}.${ext}`;
+  const { error } = await supabase.storage.from('resources').upload(path, file, { contentType: file.type || undefined, upsert: false });
+  if (error) throw error;
+  return path;
+}
+export async function createResource(row) {
+  return check(await supabase.from('resources').insert(row).select().single());
+}
+export async function deleteResource(resource) {
+  if (resource.storage_path) await supabase.storage.from('resources').remove([resource.storage_path]);
+  return check(await supabase.from('resources').delete().eq('id', resource.id));
+}
+export async function getMyAssignments(trainerId) {
+  return check(await supabase
+    .from('assignments')
+    .select('*, exercise:exercises(title), resource:resources(title), progress:assignment_progress(student_id, done_at, score, comment)')
+    .eq('trainer_id', trainerId)
+    .order('created_at', { ascending: false }));
+}
+export async function createAssignment(row) {
+  return check(await supabase.from('assignments').insert(row).select().single());
+}
+export async function deleteAssignment(id) {
+  return check(await supabase.from('assignments').delete().eq('id', id));
+}
+export async function getTrainerNotes(studentId) {
+  return check(await supabase.from('trainer_notes').select('*').eq('student_id', studentId).order('created_at', { ascending: false }));
+}
+export async function addTrainerNote(trainerId, studentId, content) {
+  return check(await supabase.from('trainer_notes').insert({ trainer_id: trainerId, student_id: studentId, content }).select().single());
+}
+export async function sendRecommendation(trainerId, studentId, message) {
+  return check(await supabase.from('recommendations').insert({ trainer_id: trainerId, student_id: studentId, message }).select().single());
+}
+export async function getSentRecommendations(studentId) {
+  return check(await supabase.from('recommendations').select('*').eq('student_id', studentId).order('created_at', { ascending: false }).limit(20));
+}
+export async function adminSetRole(email, role) {
+  return check(await supabase.rpc('admin_set_role', { p_email: email, p_role: role }));
+}
