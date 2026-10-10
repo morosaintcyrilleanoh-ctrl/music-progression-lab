@@ -15,8 +15,8 @@ import {
 } from '../data.js';
 
 const SITE = () => window.location.origin + window.location.pathname;
-const COUNT_KEY = { pitch_compare: 'questions', melody_contour: 'questions', rhythm_echo: 'patterns', pulse_tap: 'beats', sing_pair: 'pairs', melody_sing: 'count' };
-const ASSIGNABLE = ['pitch_compare', 'melody_contour', 'rhythm_echo', 'pulse_tap', 'sing_note', 'sing_glide', 'sing_sequence', 'sing_pair', 'melody_sing', 'listening_quiz'];
+const COUNT_KEY = { pitch_compare: 'questions', melody_contour: 'questions', rhythm_echo: 'patterns', pulse_tap: 'beats', sing_pair: 'pairs', melody_sing: 'count', ear_quiz: 'questions' };
+const ASSIGNABLE = ['pitch_compare', 'melody_contour', 'rhythm_echo', 'pulse_tap', 'sing_note', 'sing_glide', 'sing_sequence', 'sing_pair', 'melody_sing', 'listening_quiz', 'ear_quiz'];
 const MAX_MB = 50;
 
 function fmtDate(d) { return d ? new Date(d).toLocaleDateString('fr-FR') : '—'; }

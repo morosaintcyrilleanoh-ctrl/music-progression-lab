@@ -11,6 +11,7 @@ import { rhythmEcho, pulseTap, latencyCalibration } from './rhythm.js';
 import { breathing, warmup, journal, recordReference } from './guided.js';
 import sing from './sing.js';
 import listening from './listening.js';
+import earQuiz from './ear-quiz.js';
 import { set } from './common.js';
 
 const assessment = {
@@ -43,6 +44,7 @@ function countParams(type, count, p) {
     case 'rhythm_echo': return { patterns: count };
     case 'sing_note': return { notes: (p.notes ?? ['C', 'D', 'E', 'G', 'A']).slice(0, count) };
     case 'melody_sing': return { count, lengths: [2, 3] };
+    case 'ear_quiz': return { questions: count, intro: false };
     default: return {};
   }
 }
@@ -63,5 +65,6 @@ export const registry = {
   sing_pair: sing,
   melody_sing: sing,
   listening_quiz: listening,
+  ear_quiz: earQuiz,
   assessment
 };

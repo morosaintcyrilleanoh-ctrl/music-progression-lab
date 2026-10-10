@@ -14,6 +14,7 @@ export default {
     stats: 'Statistiques',
     course: 'Mon cours',
     trainer: 'Espace formateur',
+    library: 'Bibliothèque',
     dashboard_short: 'Accueil',
     program_short: 'Programme',
     logout_short: 'Sortir'
@@ -373,7 +374,7 @@ export default {
     err_pitch: 'A répondu « {a} » au lieu de « {b} »',
     skill_names: {
       ecoute: 'Écoute active', hauteur: 'Hauteur', justesse: 'Justesse', rythme: 'Rythme', melodie: 'Mélodie',
-      intervalles: 'Intervalles', accords: 'Accords', harmonie: 'Harmonie', timbre: 'Timbre', memoire: 'Mémoire auditive'
+      intervalles: 'Intervalles', accords: 'Accords', harmonie: 'Harmonie', timbre: 'Timbre', memoire: 'Mémoire auditive', gammes: 'Gammes et degrés'
     },
     errors: {
       _plus_aigu: 'plus aigu', _plus_grave: 'plus grave', _identique: 'identique',
@@ -565,6 +566,150 @@ export default {
     note_error: 'Impossible d’enregistrer la note (cet élève est-il bien dans ton cours ?).',
     student_homework: 'Devoirs de cet élève',
     todo: 'à faire'
+  },
+  ear: {
+    modes: {
+      interval: { title: 'Intervalles', lead: 'Reconnaître l’écart entre deux notes.', icon: '↕' },
+      chord: { title: 'Accords', lead: 'Reconnaître la couleur d’un accord.', icon: '♫' },
+      scale: { title: 'Gammes', lead: 'Reconnaître le type de gamme.', icon: '♪' },
+      degree: { title: 'Degrés de la gamme', lead: 'Situer une note dans la tonalité : la base pour jouer d’oreille.', icon: '①' },
+      progression: { title: 'Suites d’accords', lead: 'Reconnaître les enchaînements d’accords (gospel, variété, jazz).', icon: '⇄' }
+    },
+    levels: {
+      interval: [
+        'Seconde, tierce majeure, quinte, octave (en montant)',
+        '+ tierce mineure et quarte (en montant)',
+        'Les 12 intervalles (en montant)',
+        'Intervalles en descendant',
+        'Deux notes jouées ensemble (harmonique)'
+      ],
+      chord: [
+        'Majeur ou mineur ?',
+        '+ diminué et augmenté',
+        'Accords de 7e : 7, maj7, m7',
+        'Tous les accords (dont sus4)',
+        'Renversements de l’accord majeur'
+      ],
+      scale: [
+        'Majeure ou mineure ?',
+        '+ pentatoniques majeure et mineure',
+        '+ mineure harmonique et blues',
+        'Modes : dorien et mixolydien'
+      ],
+      degree: [
+        'Degrés 1, 3 et 5',
+        'Degrés 1 à 5',
+        'Les 7 degrés'
+      ],
+      progression: [
+        'Après le I : IV ou V ?',
+        'Après le I : ii, IV, V ou vi ?',
+        '4 suites d’accords célèbres',
+        '6 suites, dont la cadence rompue'
+      ]
+    },
+    level_n: 'Niveau {n}',
+    prompt: {
+      interval: 'Quel intervalle entends-tu ?',
+      chord: 'Quel accord entends-tu ?',
+      chord_inv: 'Quelle position de l’accord entends-tu ?',
+      scale: 'Quelle gamme entends-tu ?',
+      degree: 'L’application installe la tonalité (4 accords), puis joue une note. Quel degré est-ce ?',
+      progression_next: 'Le premier accord est le I (la « maison »). Quel est le deuxième accord ?',
+      progression: 'Quelle suite d’accords entends-tu ?'
+    },
+    intro_title: 'Avant de commencer',
+    intro_demo: 'Écoute d’abord chaque réponse possible (clique pour écouter) :',
+    intro_start: 'Commencer ({n} questions)',
+    wrong_title: 'C’était : {a}',
+    you_said: 'Tu as répondu : {b}.',
+    compare: 'Compare :',
+    hear_good: '▶ Bonne réponse',
+    hear_yours: '▶ Ta réponse',
+    tip_down: 'Astuce : chante l’intervalle dans l’autre sens dans ta tête (de la note grave vers l’aiguë).',
+    tip_harm: 'Astuce : essaie de chanter séparément la note grave puis la note aiguë.',
+    tip_chord: 'Astuce : écoute d’abord l’ambiance générale (joyeuse, triste, tendue…) avant de chercher le nom.',
+    tip_scale: 'Astuce : écoute surtout la 3e note (majeure ou mineure) et le nombre de notes.',
+    tip_degree: 'Astuce : chante la tonique (la « maison ») puis monte la gamme jusqu’à la note entendue, en comptant.',
+    tip_prog: 'Astuce : écoute la basse : est-ce qu’elle monte un peu (IV) ou plus haut (V) ? Un accord triste est mineur (ii ou vi).',
+    in_key: 'Tonalité : {k}.',
+    err: '{mode} : « {b} » au lieu de « {a} »',
+    unlocked: '🔓 Bravo ! Le niveau {n} est débloqué.',
+    interval: {
+      1: { d: 'Le plus petit écart : ça frotte, c’est tendu.', s: 'Les Dents de la mer (thème du film)' },
+      2: { d: 'Un pas de gamme, comme monter une marche.', s: 'Frère Jacques (« Frè-re »)' },
+      3: { d: 'Couleur mineure, un peu triste.', s: 'Greensleeves (les 2 premières notes)' },
+      4: { d: 'Couleur majeure, lumineuse.', s: 'Oh When the Saints (« Oh when »)' },
+      5: { d: 'Ouvert, solennel, comme un appel.', s: 'Amazing Grace (« A-ma… »)' },
+      6: { d: 'Instable et étrange : trois tons entiers.', s: 'Les Simpson (générique, « The Simp… »)' },
+      7: { d: 'Très stable et « creux », comme un cor.', s: 'Ah ! vous dirai-je, maman (entre « vous » et « di »)' },
+      8: { d: 'Large et mélancolique.', s: '' },
+      9: { d: 'Large et chaleureux.', s: 'My Bonnie Lies Over the Ocean (« My Bon… »)' },
+      10: { d: 'Tendu mais doux, typique du blues et du gospel.', s: 'Star Trek (thème original)' },
+      11: { d: 'Presque une octave : grande tension qui veut monter.', s: '' },
+      12: { d: 'La même note, plus haut : grand saut très stable.', s: 'Over the Rainbow (« Some-where »)' }
+    },
+    chord: {
+      maj: 'Lumineux et stable.',
+      min: 'Plus sombre, mélancolique.',
+      dim: 'Tendu, inquiétant, instable.',
+      aug: 'Flottant, comme un rêve suspendu.',
+      sus4: 'Suspendu : ni majeur ni mineur, il appelle une résolution.',
+      dom7: 'Une tension qui veut aller quelque part : blues, gospel.',
+      maj7: 'Doux et rêveur, très « jazz ».',
+      min7: 'Doux et sombre, typique de la soul et du RnB.',
+      inv0: 'La fondamentale est en bas : position la plus stable.',
+      inv1: 'La tierce est en bas : plus léger, moins « posé ».',
+      inv2: 'La quinte est en bas : ouvert, un peu en suspens.'
+    },
+    scale: {
+      majeure: 'Joyeuse et stable : do-ré-mi-fa-sol-la-si-do.',
+      mineure: 'Plus sombre : la 3e, la 6e et la 7e sont abaissées.',
+      penta_maj: '5 notes sans demi-ton : musiques africaines, gospel, country.',
+      penta_min: '5 notes, couleur mineure : base des solos de blues, rock et afro.',
+      mineure_harm: 'Mineure avec la 7e relevée : un saut caractéristique, couleur « orientale ».',
+      blues: 'Pentatonique mineure + la « blue note ».',
+      dorien: 'Mineure avec une 6e lumineuse : jazz, funk, soul.',
+      mixolydien: 'Majeure avec la 7e abaissée : rock, gospel, afrobeat.'
+    },
+    degree: {
+      1: { n: '1 · tonique', d: 'La « maison » : repos complet.' },
+      2: { n: '2 · sus-tonique', d: 'Juste au-dessus de la maison, elle veut redescendre.' },
+      3: { n: '3 · médiante', d: 'Douce, elle donne la couleur majeure.' },
+      4: { n: '4 · sous-dominante', d: 'Un peu suspendue, elle veut descendre vers le 3.' },
+      5: { n: '5 · dominante', d: 'Stable mais ouverte, elle appelle le retour à la maison.' },
+      6: { n: '6 · sus-dominante', d: 'Tendre, un peu nostalgique.' },
+      7: { n: '7 · sensible', d: 'Très tendue : elle veut monter vers la tonique.' }
+    },
+    prog: {
+      2: 'ii : accord mineur, il prépare souvent le V.',
+      4: 'IV : douceur, ouverture (comme le « A-men » des cantiques).',
+      5: 'V : une tension qui veut revenir au I.',
+      6: 'vi : accord mineur, couleur émouvante.',
+      'I-IV-V-I': 'La cadence la plus classique : cantiques, chants populaires.',
+      'I-V-vi-IV': 'La suite de très nombreux tubes pop et gospel.',
+      'ii-V-I': 'Le cœur du jazz et du gospel.',
+      'I-vi-IV-V': 'La suite des années 50 (doo-wop), encore très utilisée.',
+      'vi-IV-I-V': 'Variante qui commence en mineur : très utilisée en pop.',
+      'I-IV-V-vi': 'Cadence rompue : on attend le I, on entend le vi… surprise !'
+    }
+  },
+  library: {
+    eyebrow: 'Entraînement libre',
+    title: 'Bibliothèque d’exercices',
+    lead: 'Choisis un thème et un niveau. Réussis un niveau à 80 % ou plus pour débloquer le suivant.',
+    locked: 'Réussis le niveau précédent à 80 % pour le débloquer.',
+    others: 'Autres exercices',
+    others_lead: 'Les exercices de hauteur, rythme, mélodie et chant du programme.',
+    start: 'Commencer',
+    done_title: 'Exercice terminé 🎉',
+    again: 'Recommencer',
+    next_level: 'Niveau suivant',
+    back: 'Retour à la bibliothèque',
+    keep_going: 'Il faut 80 % pour débloquer le niveau suivant. Recommence quand tu veux : chaque essai t’entraîne !',
+    max_level: 'Tu as atteint le dernier niveau de ce thème. Bravo !',
+    staff_note: 'En tant que formateur, tous les niveaux te sont ouverts.',
+    not_installed: 'Les exercices d’oreille ne sont pas encore installés dans la base (script 6).'
   },
   common: {
     loading: 'Chargement…',

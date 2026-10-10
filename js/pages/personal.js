@@ -8,7 +8,7 @@ import { unlockAudio } from '../audio.js';
 import { runExercises } from '../runner.js';
 import {
   getProfile, getExerciseBySlug, saveDiagnostic, getLastDiagnostic, getStarterProgram, getSkillScores,
-  updateVoiceRange, startSession, completeSession
+  updateVoiceRange, startSession, completeSession, getEarProgress
 } from '../data.js';
 
 // Quel exercice sert à travailler quelle compétence
@@ -17,8 +17,20 @@ export const SKILL_EXERCISES = {
   justesse: { slug: 'chanter-une-note', params: { notes: ['C', 'E', 'G'] } },
   rythme: { slug: 'rythme-miroir', params: { patterns: 4 } },
   melodie: { slug: 'dessin-melodie', params: { questions: 6 } },
-  ecoute: { slug: 'ecoute-3-ecoutes', params: {} }
+  ecoute: { slug: 'ecoute-3-ecoutes', params: {} },
+  intervalles: { ear: ['interval'] },
+  accords: { ear: ['chord'] },
+  gammes: { ear: ['scale', 'degree'] },
+  harmonie: { ear: ['progression'] }
 };
+
+// Exercices d'oreille : on prend le niveau le plus haut débloqué par l'élève
+const EAR_SLUG = { interval: 'intervalles', chord: 'accords', scale: 'gammes', degree: 'degres', progression: 'suites-accords' };
+function resolvePlan(p, earProgress = {}) {
+  if (!p.ear) return p;
+  const mode = p.ear[Math.floor(Math.random() * p.ear.length)];
+  return { slug: `${EAR_SLUG[mode]}-n${earProgress[mode] ?? 1}`, params: { questions: 8 } };
+}
 
 const DIAG_PLAN = [
   { skill: 'hauteur', slug: 'aigu-grave-identique', params: { questions: 8, start_semitones: 5, min_semitones: 1 } },
@@ -53,9 +65,10 @@ function bindVoice(userId, onPick) {
   }));
 }
 
-async function loadExercises(plan) {
+async function loadExercises(plan, earProgress = {}) {
   const out = [];
-  for (const p of plan) {
+  for (const raw of plan) {
+    const p = resolvePlan(raw, earProgress);
     const ex = await getExerciseBySlug(p.slug);
     if (ex) out.push({ ...ex, params: { ...(ex.params ?? {}), ...p.params } });
   }
@@ -203,7 +216,8 @@ export async function trainingPage() {
     unlockAudio();
     let exercises, sessionId = null;
     try {
-      exercises = await loadExercises(chosen.map((s) => SKILL_EXERCISES[s.skill_id]));
+      const earProgress = await getEarProgress(user.id).catch(() => ({}));
+      exercises = await loadExercises(chosen.map((s) => SKILL_EXERCISES[s.skill_id]), earProgress);
       sessionId = await startSession(null);
     } catch (err) { console.error(err); toast(t('errors.generic'), 'error'); return; }
     const xpBefore = profile?.xp ?? 0;

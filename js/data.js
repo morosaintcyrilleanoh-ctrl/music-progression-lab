@@ -303,3 +303,14 @@ export async function getSentRecommendations(studentId) {
 export async function adminSetRole(email, role) {
   return check(await supabase.rpc('admin_set_role', { p_email: email, p_role: role }));
 }
+
+// ---------------------------------------------------------------------
+// Exercices d'oreille : niveaux débloqués
+// ---------------------------------------------------------------------
+export async function getEarProgress(userId) {
+  const rows = check(await supabase.from('ear_progress').select('mode, best_level').eq('user_id', userId));
+  return Object.fromEntries(rows.map((r) => [r.mode, r.best_level]));
+}
+export async function unlockEarLevel(mode, level) {
+  return check(await supabase.rpc('unlock_ear_level', { p_mode: mode, p_level: level }));
+}

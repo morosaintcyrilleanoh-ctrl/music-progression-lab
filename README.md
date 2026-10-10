@@ -17,7 +17,12 @@ Base de données et comptes : **Supabase**. Hébergement : **Vercel**.
 | `js/auth.js` | Connexion et messages d'erreur en français |
 | `js/data.js` | Lecture des données dans Supabase |
 | `js/i18n/fr.js` | Tous les textes en français (ajouter `en.js` pour l'anglais) |
-| `js/pages/` | Une page par fichier : accueil, comptes, tableau de bord, programme |
+| `js/pages/` | Une page par fichier : accueil, comptes, tableau de bord, programme, séance, statistiques, diagnostic et entraînement (`personal.js`), mon cours (`course.js`), espace formateur (`trainer.js`) |
+| `js/exercises/` | Les exercices interactifs (un fichier par famille) et leur registre `index.js` |
+| `js/audio.js` / `js/pitch.js` | Production des sons / détection de la voix au micro (algorithme YIN) |
+| `js/runner.js` | Lanceur d'exercices (diagnostic, entraînement, devoirs) |
+| `js/exercises/ear-quiz.js` | Exercices d'oreille : intervalles, accords, gammes, degrés, suites d'accords |
+| `js/pages/library.js` | Bibliothèque d'exercices (niveaux à débloquer) |
 
 ## Sécurité
 

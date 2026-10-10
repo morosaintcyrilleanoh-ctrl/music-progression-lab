@@ -15,6 +15,7 @@ import { statsPage } from './pages/stats.js';
 import { diagnosticPage, diagnosticResultPage, trainingPage } from './pages/personal.js';
 import { coursePage, assignmentPage } from './pages/course.js';
 import { trainerPage, trainerStudentPage } from './pages/trainer.js';
+import { libraryPage } from './pages/library.js';
 import { getProfile } from './data.js';
 
 // ---------- Les pages ----------
@@ -31,6 +32,7 @@ route('/statistiques', statsPage, { auth: true });
 route('/diagnostic', diagnosticPage, { auth: true });
 route('/diagnostic/resultat', diagnosticResultPage, { auth: true });
 route('/entrainement', trainingPage, { auth: true });
+route('/bibliotheque', libraryPage, { auth: true });
 route('/cours', coursePage, { auth: true });
 route('/devoir/:id', assignmentPage, { auth: true });
 route('/formateur', trainerPage, { auth: true });
@@ -79,6 +81,7 @@ function renderNav() {
     <div class="nav-links" id="nav-links">
       ${link('#/tableau-de-bord', t('nav.dashboard'))}
       ${link('#/programme', t('nav.program'))}
+      ${link('#/bibliotheque', t('nav.library'))}
       ${link('#/statistiques', t('nav.stats'))}
       ${link('#/cours', t('nav.course'))}
       ${staff ? link('#/formateur', t('nav.trainer')) : ''}
