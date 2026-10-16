@@ -23,9 +23,26 @@ Base de données et comptes : **Supabase**. Hébergement : **Vercel**.
 | `js/runner.js` | Lanceur d'exercices (diagnostic, entraînement, devoirs) |
 | `js/exercises/ear-quiz.js` | Exercices d'oreille : intervalles, accords, gammes, degrés, suites d'accords |
 | `js/pages/library.js` | Bibliothèque d'exercices (niveaux à débloquer) |
+| `solfege/` | Volet **Solfège** (lecture des notes, rythme, tonalités, intervalles, test de niveau) — fichiers **générés**, ne pas modifier à la main |
 
 ## Sécurité
 
 - `js/config.js` contient uniquement la clé **publique** de Supabase (normalement visible).
 - Ne jamais y mettre la clé `service_role` / `secret`.
 - La protection des données est assurée par les règles de la base (Row Level Security).
+
+## Volet Solfège
+
+Le dossier `solfege/` contient le volet solfège, accessible depuis le menu (**Solfège**)
+et la page d'accueil, à l'adresse `/solfege/`. Il fonctionne **sans compte ni base de
+données** : les résultats restent sur l'appareil de l'élève, et il reste utilisable
+hors connexion après une première visite.
+
+Ces fichiers sont produits à partir du projet **Solfège Progression** (même code que les
+laboratoires de ce projet, aux couleurs de Music Progression Lab). Pour les mettre à jour :
+
+```bash
+# dans le dossier du projet solfege-progression
+npm run export:mpl -- ../music-progression-lab/solfege
+npm run test:e2e:mpl -- ../music-progression-lab
+```

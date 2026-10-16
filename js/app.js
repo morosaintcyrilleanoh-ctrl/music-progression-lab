@@ -71,6 +71,7 @@ function renderNav() {
   const user = getUser();
   if (!user) {
     nav.innerHTML = String(html`
+      ${link('/solfege/', t('nav.solfege'))}
       <a class="nav-link" href="#/connexion">${t('nav.login')}</a>
       <a class="btn btn-sm" href="#/inscription">${t('nav.signup')}</a>`);
     return;
@@ -81,6 +82,7 @@ function renderNav() {
     <div class="nav-links" id="nav-links">
       ${link('#/tableau-de-bord', t('nav.dashboard'))}
       ${link('#/programme', t('nav.program'))}
+      ${link('/solfege/', t('nav.solfege'))}
       ${link('#/bibliotheque', t('nav.library'))}
       ${link('#/statistiques', t('nav.stats'))}
       ${link('#/cours', t('nav.course'))}

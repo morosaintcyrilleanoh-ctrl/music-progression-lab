@@ -1,0 +1,5 @@
+:HL["/solfege/_next/static/chunks/3iqjap0jcm5_x.css","style"]
+:HL["/solfege/_next/static/media/fba5a26ea33df6a3-s.p.18rizl4rsrl42.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+2:[["children",{"s":"__PAGE__","h":160}]]
+1:[["children",{"s":"tableau-de-bord","h":96,"c":"$Q2"}]]
+0:{"b":"qdGlBRBJVPG4hB2jjSqt0","t":{"t":{"s":"","h":80,"c":"$Q1"}}}
