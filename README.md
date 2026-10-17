@@ -58,6 +58,25 @@ dans Supabase → *SQL Editor* du projet Music Progression Lab. Sans cette table
 fonctionne normalement et le bloc « Solfège » indique que le suivi n'est pas activé.
 Tests de la migration sur un PostgreSQL local : `bash scripts/test-db.sh`.
 
+### Espace solfège : formations, lives, ressources
+
+Depuis l'accueil du solfège (cases **Formations · Lives · Ressources**), l'élève connecté
+retrouve ce que son formateur publie (`#/espace-solfege/...`) : formations découpées en
+leçons (texte, vidéo YouTube/Google Drive, fichiers joints) avec sa progression, lives
+(bouton « Rejoindre », replays) et ressources (audio, vidéo, image, PDF, texte, lien).
+Le formateur publie tout cela dans **Espace formateur → 🎼 Solfège**, pour tous ses élèves
+ou pour un seul. Les ressources « oreille » existantes ne changent pas.
+
+- Lives : lien **Jitsi** créé automatiquement (gratuit, sans compte pour les élèves ;
+  le formateur peut devoir se connecter avec Google pour ouvrir la salle) ou lien
+  Zoom / Google Meet du formateur.
+- Fichiers : compartiment privé `solfege-files` (50 Mo par fichier, liens temporaires).
+  Pour les longues vidéos, un lien YouTube « non répertorié » évite de remplir le
+  stockage gratuit de Supabase (1 Go).
+
+**Activation (une fois)** : exécuter `supabase/migrations/20261018120000_solfege_espace.sql`
+dans Supabase → *SQL Editor* du projet Music Progression Lab.
+
 Ces fichiers sont produits à partir du projet **Solfège Progression** (même code que les
 laboratoires de ce projet, aux couleurs de Music Progression Lab). Pour les mettre à jour :
 

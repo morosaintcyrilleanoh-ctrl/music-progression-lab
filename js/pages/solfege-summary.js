@@ -2,17 +2,35 @@
 // (fiche élève côté formateur et tableau de bord de l'élève)
 import { html } from '../ui.js';
 import { t } from '../i18n.js';
-import { getSolfegeSessions } from '../data.js';
+import { getSolfegeSessions, getSolfegeCourses, getSolfegeProgress } from '../data.js';
 import { syncSolfege } from '../solfege-sync.js';
 
 const LABS = ['lecture-des-notes', 'rythme', 'tonalites', 'intervalles'];
 const pct = (c, n) => (n ? Math.round((c / n) * 100) : 0);
 const fmt = (d) => new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
 
+// Formations de solfège de l'élève : leçons terminées / total (vide si rien à montrer)
+async function coursesProgress(userId) {
+  try {
+    const [courses, progress] = await Promise.all([getSolfegeCourses(), getSolfegeProgress(userId)]);
+    const done = new Set(progress.map((p) => p.lesson_id));
+    const list = courses.filter((c) => c.lessons.length && (!c.student_id || c.student_id === userId));
+    if (!list.length) return '';
+    return String(html`<h3 style="font-size:1rem;margin:18px 0 6px">${t('sol.formations')}</h3>
+      <ul class="skills">${list.map((c) => {
+        const d = c.lessons.filter((l) => done.has(l.id)).length;
+        const n = c.lessons.length;
+        return html`<li><div class="skill-head"><span>${c.title}</span><span class="muted">${t('sol.lessons_progress', { d, n })}</span></div>
+          <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct(d, n)}" aria-label="${c.title}"><span style="width:${pct(d, n)}%"></span></div></li>`;
+      })}</ul>`);
+  } catch { return ''; } // espace solfège pas encore activé : on n'affiche rien
+}
+
 /** Affiche le bloc dans `el`. `own` : c'est l'élève connecté (on envoie d'abord ses séances). */
 export async function renderSolfege(el, userId, { own = false } = {}) {
   const labNames = t('solfege.labs');
   let sessions;
+  const courses = coursesProgress(userId);
   try {
     if (own) await syncSolfege().catch(() => null);
     sessions = await getSolfegeSessions(userId);
@@ -30,6 +48,7 @@ export async function renderSolfege(el, userId, { own = false } = {}) {
     el.innerHTML = String(html`<h2 style="font-size:1.15rem">🎼 ${t('solfege.title')}</h2>
       <p class="muted">${own ? t('solfege.empty_own') : t('solfege.empty_trainer')}</p>
       ${own ? html`<a class="btn btn-sm" href="/solfege/">${t('solfege.open')}</a>` : ''}`);
+    el.insertAdjacentHTML('beforeend', await courses);
     return;
   }
 
@@ -60,4 +79,5 @@ export async function renderSolfege(el, userId, { own = false } = {}) {
         ${s.mode === 'evaluation' ? '📝' : '🎯'} <strong>${labNames[s.lab]}</strong> — ${s.correct}/${s.total} (${pct(s.correct, s.total)} %)
         <span class="muted">· ${t(s.mode === 'evaluation' ? 'solfege.mode_eval' : 'solfege.mode_training')} · ${fmt(s.started_at)}${s.finished_at ? '' : ' · ' + t('solfege.unfinished')}</span></li>`)}</ul>` : ''}
     ${own ? html`<p class="muted small" style="margin:12px 0 0">${t('solfege.own_hint')} <a href="/solfege/">${t('solfege.open')}</a></p>` : ''}`);
+  el.insertAdjacentHTML('beforeend', await courses);
 }

@@ -324,3 +324,98 @@ export async function getSolfegeSessions(userId, limit = 200) {
     .order('started_at', { ascending: false })
     .limit(limit));
 }
+
+// ---------------------------------------------------------------------
+// Espace Solfège : formations, leçons, lives, ressources
+// (les règles de la base limitent chacun à ce qu'il a le droit de voir)
+// ---------------------------------------------------------------------
+const SOLFEGE_BUCKET = 'solfege-files';
+
+export async function getSolfegeCourses() {
+  return check(await supabase
+    .from('solfege_courses')
+    .select('*, lessons:solfege_lessons(id, title, position)')
+    .order('position').order('created_at'));
+}
+export async function getSolfegeCourse(id) {
+  return check(await supabase.from('solfege_courses').select('*, lessons:solfege_lessons(*)').eq('id', id).maybeSingle());
+}
+export async function createSolfegeCourse(row) {
+  return check(await supabase.from('solfege_courses').insert(row).select().single());
+}
+export async function deleteSolfegeCourse(course) {
+  const ids = (course.lessons ?? []).map((l) => l.id);
+  if (ids.length) await removeSolfegeFiles(await getSolfegeLessonResources(ids));
+  return check(await supabase.from('solfege_courses').delete().eq('id', course.id));
+}
+export async function createSolfegeLesson(row) {
+  return check(await supabase.from('solfege_lessons').insert(row).select().single());
+}
+export async function deleteSolfegeLesson(id) {
+  await removeSolfegeFiles(await getSolfegeLessonResources([id]));
+  return check(await supabase.from('solfege_lessons').delete().eq('id', id));
+}
+export async function getSolfegeLessonResources(lessonIds) {
+  if (!lessonIds.length) return [];
+  return check(await supabase.from('solfege_resources').select('*').in('lesson_id', lessonIds).order('created_at'));
+}
+// Leçons terminées : celles de l'élève connecté, ou (formateur) celles d'un élève
+export async function getSolfegeProgress(studentId) {
+  return check(await supabase.from('solfege_lesson_progress').select('lesson_id, student_id, done_at').eq('student_id', studentId));
+}
+export async function setSolfegeLessonDone(lessonId, done) {
+  if (done) {
+    const { error } = await supabase.from('solfege_lesson_progress').insert({ lesson_id: lessonId });
+    if (error && error.code !== '23505') throw error; // déjà cochée : rien à faire
+    return;
+  }
+  check(await supabase.from('solfege_lesson_progress').delete().eq('lesson_id', lessonId));
+}
+
+export async function getSolfegeLives() {
+  return check(await supabase.from('solfege_lives').select('*').order('starts_at'));
+}
+export async function createSolfegeLive(row) {
+  return check(await supabase.from('solfege_lives').insert(row).select().single());
+}
+export async function updateSolfegeLive(id, fields) {
+  return check(await supabase.from('solfege_lives').update(fields).eq('id', id).select().single());
+}
+export async function deleteSolfegeLive(id) {
+  return check(await supabase.from('solfege_lives').delete().eq('id', id));
+}
+
+// Ressources libres (hors leçons)
+export async function getSolfegeResources() {
+  return check(await supabase.from('solfege_resources').select('*').is('lesson_id', null).order('created_at', { ascending: false }));
+}
+export async function createSolfegeResource(row) {
+  return check(await supabase.from('solfege_resources').insert(row).select().single());
+}
+export async function deleteSolfegeResource(resource) {
+  await removeSolfegeFiles([resource]);
+  return check(await supabase.from('solfege_resources').delete().eq('id', resource.id));
+}
+export async function uploadSolfegeFile(trainerId, file) {
+  const ext = (file.name.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 8);
+  const path = `${trainerId}/${crypto.randomUUID()}.${ext}`;
+  const { error } = await supabase.storage.from(SOLFEGE_BUCKET).upload(path, file, { contentType: file.type || undefined, upsert: false });
+  if (error) throw error;
+  return path;
+}
+async function removeSolfegeFiles(resources) {
+  const paths = resources.map((r) => r.storage_path).filter(Boolean);
+  if (paths.length) await supabase.storage.from(SOLFEGE_BUCKET).remove(paths);
+}
+// Liens temporaires (1 h) vers les fichiers privés
+export async function getSolfegeFileUrls(paths) {
+  if (!paths.length) return {};
+  const { data, error } = await supabase.storage.from(SOLFEGE_BUCKET).createSignedUrls(paths, 3600);
+  if (error) throw error;
+  return Object.fromEntries((data ?? []).filter((d) => d.signedUrl).map((d) => [d.path, d.signedUrl]));
+}
+// Formateur : leçons terminées par ses élèves dans une formation
+export async function getSolfegeCourseProgress(lessonIds) {
+  if (!lessonIds.length) return [];
+  return check(await supabase.from('solfege_lesson_progress').select('lesson_id, student_id, done_at').in('lesson_id', lessonIds));
+}
