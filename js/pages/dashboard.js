@@ -3,6 +3,7 @@ import { html, mount, toast } from '../ui.js';
 import { t } from '../i18n.js';
 import { getUser } from '../auth.js';
 import { pickSkills } from './personal.js';
+import { renderSolfege } from './solfege-summary.js';
 import {
   getLastDiagnostic, getSkillScores, getVisibleAssignments, getMyAssignmentProgress, getMyRecommendations,
   getProfile, getStarterProgram, getUserProgram, getSkillsWithScores,
@@ -113,6 +114,8 @@ export async function dashboardPage() {
         <p class="muted small" style="margin:16px 0 0">${t('dashboard.skills_hint')}</p>
       </section>
 
+      <section class="card" id="solfege-zone" aria-label="${t('solfege.title')}"><div class="spinner" role="status"></div></section>
+
       <div><a class="btn btn-ghost" href="#/programme">${t('dashboard.see_program')}</a></div>
     </div>
   `);
@@ -131,6 +134,7 @@ export async function dashboardPage() {
   });
 
   loadExtras(user, profile);
+  renderSolfege(document.getElementById('solfege-zone'), user.id, { own: true });
 }
 
 // Cartes complémentaires : diagnostic, entraînement personnalisé, devoirs, messages, espace formateur

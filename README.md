@@ -34,9 +34,29 @@ Base de données et comptes : **Supabase**. Hébergement : **Vercel**.
 ## Volet Solfège
 
 Le dossier `solfege/` contient le volet solfège, accessible depuis le menu (**Solfège**)
-et la page d'accueil, à l'adresse `/solfege/`. Il fonctionne **sans compte ni base de
-données** : les résultats restent sur l'appareil de l'élève, et il reste utilisable
-hors connexion après une première visite.
+et la page d'accueil, à l'adresse `/solfege/`. Il fonctionne sans compte : les résultats
+restent sur l'appareil de l'élève, et il reste utilisable hors connexion après une
+première visite.
+
+### Résultats de solfège dans le compte de l'élève
+
+Quand l'élève est **connecté au Lab**, chaque séance de solfège porte son identifiant ;
+le Lab (`js/solfege-sync.js`, chargé aussi par les pages du solfège via
+`js/solfege-bridge.js`) l'enregistre dans la table `solfege_sessions`. Les séances
+faites sans être connecté, ou par un autre élève sur le même appareil, ne sont jamais
+envoyées. Les résultats apparaissent :
+
+- sur le **tableau de bord** de l'élève (bloc « Solfège ») ;
+- sur la **fiche élève** de l'espace formateur.
+
+Règles d'accès (RLS) : l'élève n'écrit que ses propres séances ; seuls l'élève, son
+formateur (table `trainer_students`) et les administrateurs peuvent les lire ; aucune
+suppression par l'API.
+
+**Activation (une fois)** : exécuter `supabase/migrations/20261017120000_solfege_sessions.sql`
+dans Supabase → *SQL Editor* du projet Music Progression Lab. Sans cette table, le site
+fonctionne normalement et le bloc « Solfège » indique que le suivi n'est pas activé.
+Tests de la migration sur un PostgreSQL local : `bash scripts/test-db.sh`.
 
 Ces fichiers sont produits à partir du projet **Solfège Progression** (même code que les
 laboratoires de ce projet, aux couleurs de Music Progression Lab). Pour les mettre à jour :
@@ -45,4 +65,5 @@ laboratoires de ce projet, aux couleurs de Music Progression Lab). Pour les mett
 # dans le dossier du projet solfege-progression
 npm run export:mpl -- ../music-progression-lab/solfege
 npm run test:e2e:mpl -- ../music-progression-lab
+npm run test:e2e:mpl-sync -- ../music-progression-lab   # envoi des résultats
 ```

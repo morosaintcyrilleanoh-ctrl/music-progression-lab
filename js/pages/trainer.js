@@ -8,6 +8,7 @@ import { getUser } from '../auth.js';
 import { renderStats } from './stats.js';
 import { resourceItem, bindResourceActions } from './course.js';
 import { levelLabel } from './personal.js';
+import { renderSolfege } from './solfege-summary.js';
 import {
   getProfile, getTrainerCode, getStudentList, getMyResources, uploadResourceFile, createResource, deleteResource,
   getMyAssignments, createAssignment, deleteAssignment, getExercisesList, getTrainerNotes, addTrainerNote,
@@ -358,6 +359,7 @@ export async function trainerStudentPage({ id }) {
       ${diag ? html`<section class="card"><h2 style="font-size:1.15rem">${t('trainer.diag_title', { d: fmtDate(diag.taken_at) })}</h2>
         <ul class="result-list">${Object.entries(diag.results ?? {}).filter(([k]) => !k.endsWith('_auto')).map(([k, v]) => html`<li><span>${t('stats.skill_names')[k] ?? k}</span><strong>${levelLabel(v)} <span class="muted small">(${v} %${diag.results[k + '_auto'] ? ' · ' + t('diag.auto') : ''})</span></strong></li>`)}</ul></section>` : ''}
       <div id="st-zone" class="dash-inner"><div class="spinner" role="status"></div></div>
+      <section class="card" id="solfege-zone" aria-label="${t('solfege.title')}"><div class="spinner" role="status"></div></section>
       <div class="grid grid-2">
         <section class="card">
           <h2 style="font-size:1.15rem">${t('trainer.send_msg')}</h2>
@@ -384,6 +386,7 @@ export async function trainerStudentPage({ id }) {
     </div>`);
 
   renderStats(document.getElementById('st-zone'), id, { trainerView: true });
+  renderSolfege(document.getElementById('solfege-zone'), id);
 
   document.getElementById('msg-form').addEventListener('submit', async (e) => {
     e.preventDefault();
