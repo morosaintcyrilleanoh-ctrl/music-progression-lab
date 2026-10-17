@@ -17,4 +17,5 @@ PSQL=("${RUN[@]}" psql -h "$DIR" -p "$PORT" -U postgres -d postgres -v ON_ERROR_
 "${PSQL[@]}" -f "$ROOT/supabase/tests/00_mock.sql"
 for f in "$ROOT"/supabase/migrations/*.sql; do echo "→ migration $(basename "$f")"; "${PSQL[@]}" -f "$f"; done
 echo "→ tests"
-"${PSQL[@]}" -f "$ROOT/supabase/tests/solfege.test.sql" 2>&1 | grep -E "ok :|ÉCHEC" | sed 's/^psql:[^ ]* //'
+# Un seul psql : les fonctions d'aide (pg_temp) servent à tous les fichiers de tests.
+cat "$ROOT"/supabase/tests/solfege*.test.sql | "${PSQL[@]}" 2>&1 | grep -E "ok :|ÉCHEC|ERROR" | sed 's/^psql:[^ ]* //'
