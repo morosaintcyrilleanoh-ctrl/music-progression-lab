@@ -17,6 +17,7 @@ import { coursePage, assignmentPage } from './pages/course.js';
 import { trainerPage, trainerStudentPage } from './pages/trainer.js';
 import { libraryPage } from './pages/library.js';
 import { getProfile } from './data.js';
+import { syncSolfege } from './solfege-sync.js';
 import { icons } from './art.js';
 
 // ---------- Les pages ----------
@@ -139,6 +140,8 @@ async function start() {
   await initAuth().catch((err) => console.error(err));
   await loadRole();
   renderNav();
+  // Séances de solfège faites sur cet appareil en étant connecté → compte de l'élève
+  if (getUser()) syncSolfege().catch(() => null);
 
   // Nettoie l'adresse (retire ?confirme=1, ?reinit=1 ou #access_token=...)
   const cleanHash = window.location.hash.startsWith('#/') ? window.location.hash : '#/';
@@ -155,6 +158,7 @@ async function start() {
 
   onAuthChange(async (event) => {
     if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'USER_UPDATED') await loadRole();
+    if (event === 'SIGNED_IN') syncSolfege().catch(() => null);
     renderNav();
     if (event === 'PASSWORD_RECOVERY') navigate('/nouveau-mot-de-passe');
     // Si l'utilisateur se déconnecte sur une page privée, on le renvoie à l'accueil

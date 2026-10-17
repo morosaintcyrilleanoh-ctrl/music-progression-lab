@@ -724,6 +724,23 @@ export default {
     staff_note: 'En tant que formateur, tous les niveaux te sont ouverts.',
     not_installed: 'Les exercices d’oreille ne sont pas encore installés dans la base (script 6).'
   },
+  solfege: {
+    title: 'Solfège',
+    labs: { 'lecture-des-notes': 'Lecture des notes', rythme: 'Rythme', tonalites: 'Tonalités', intervalles: 'Intervalles' },
+    levels: { debutant: 'Débutant', intermediaire: 'Intermédiaire', avance: 'Avancé' },
+    placement: 'Test de niveau : {level} ({d})',
+    sessions_n: { one: '{n} séance', other: '{n} séances' },
+    last_eval: 'Dernière évaluation : {score} le {d}',
+    recent: 'Dernières séances',
+    mode_eval: 'évaluation',
+    mode_training: 'entraînement',
+    unfinished: 'non terminée',
+    empty_trainer: 'Aucune séance de solfège enregistrée pour le moment. Les séances apparaissent ici quand l’élève fait le solfège en étant connecté.',
+    empty_own: 'Fais tes exercices de solfège en étant connecté : tes résultats seront enregistrés ici et visibles par ton formateur.',
+    own_hint: 'Tes séances de solfège faites en étant connecté sont enregistrées automatiquement.',
+    open: 'Ouvrir le solfège',
+    not_ready: 'Le suivi du solfège n’est pas encore activé sur la base de données.'
+  },
   common: {
     loading: 'Chargement…',
     retry: 'Réessayer',

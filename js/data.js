@@ -314,3 +314,13 @@ export async function getEarProgress(userId) {
 export async function unlockEarLevel(mode, level) {
   return check(await supabase.rpc('unlock_ear_level', { p_mode: mode, p_level: level }));
 }
+
+// Volet Solfège : séances enregistrées depuis /solfege (les plus récentes d'abord)
+export async function getSolfegeSessions(userId, limit = 200) {
+  return check(await supabase
+    .from('solfege_sessions')
+    .select('id, lab, mode, correct, total, level, average_ms, skills, started_at, finished_at')
+    .eq('user_id', userId)
+    .order('started_at', { ascending: false })
+    .limit(limit));
+}
