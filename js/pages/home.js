@@ -1,9 +1,10 @@
 // Page d'accueil
-import { html, mount } from '../ui.js';
+import { html, mount, raw } from '../ui.js';
 import { t } from '../i18n.js';
 import { getUser } from '../auth.js';
 import { getStarterProgram } from '../data.js';
 import { isConfigured } from '../supabase.js';
+import { heroArt, icons } from '../art.js';
 
 export async function homePage() {
   const user = getUser();
@@ -12,14 +13,38 @@ export async function homePage() {
   mount(html`
     <section class="hero">
       <div class="container">
-        <p class="eyebrow">${t('home.eyebrow')}</p>
-        <h1>${t('home.title_1')} <span class="gradient-text">${t('home.title_2')}</span> ${t('home.title_3')}</h1>
-        <p class="slogan">${t('home.lead')}</p>
-        <div class="row">
-          ${user
-            ? html`<a class="btn btn-lg" href="#/tableau-de-bord">${t('home.cta_dashboard')}</a>`
-            : html`<a class="btn btn-lg" href="#/inscription">${t('home.cta_start')}</a>
-                   <a class="btn btn-lg btn-ghost" href="#/connexion">${t('home.cta_login')}</a>`}
+        <div>
+          <p class="eyebrow">${t('home.eyebrow')}</p>
+          <h1>${t('home.title_1')} <span class="gradient-text">${t('home.title_2')}</span> ${t('home.title_3')}</h1>
+          <p class="slogan">${t('home.lead')}</p>
+          <div class="row">
+            ${user
+              ? html`<a class="btn btn-lg" href="#/tableau-de-bord">${t('home.cta_dashboard')}</a>`
+              : html`<a class="btn btn-lg" href="#/inscription">${t('home.cta_start')}</a>
+                     <a class="btn btn-lg btn-ghost" href="#/connexion">${t('home.cta_login')}</a>`}
+          </div>
+        </div>
+        ${raw(heroArt())}
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <h2>${t('home.features_title')}</h2>
+        <div class="grid features">
+          <a class="card feature" href="#/programme">
+            <span class="feature-ico">${raw(icons.ear)}</span>
+            <div><h3>${t('home.f_ear_title')}</h3><p class="muted small">${t('home.f_ear_text')}</p></div>
+          </a>
+          <a class="card feature" href="/solfege/">
+            <span class="feature-ico">${raw(icons.staff)}</span>
+            <div><h3>${t('home.f_solfege_title')} <span class="badge-new">${t('home.solfege_eyebrow')}</span></h3><p class="muted small">${t('home.solfege_text')}</p>
+            <span class="feature-more">${t('home.solfege_cta')} →</span></div>
+          </a>
+          <a class="card feature" href="#/statistiques">
+            <span class="feature-ico">${raw(icons.chart)}</span>
+            <div><h3>${t('home.f_stats_title')}</h3><p class="muted small">${t('home.f_stats_text')}</p></div>
+          </a>
         </div>
       </div>
     </section>
@@ -44,17 +69,6 @@ export async function homePage() {
         <h2>${t('home.program_title')}</h2>
         <p class="muted">${t('home.program_lead')}</p>
         <div id="home-days"><div class="spinner" role="status" aria-label="${t('common.loading')}"></div></div>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="container" style="max-width:720px">
-        <div class="card card-highlight">
-          <p class="eyebrow">${t('home.solfege_eyebrow')}</p>
-          <h2>${t('home.solfege_title')}</h2>
-          <p class="muted">${t('home.solfege_text')}</p>
-          <a class="btn" href="/solfege/">${t('home.solfege_cta')}</a>
-        </div>
       </div>
     </section>
 
