@@ -1,7 +1,7 @@
 // =====================================================================
 // MUSIC PROGRESSION LAB — point de départ de l'application
 // =====================================================================
-import { html, toast, showLoading, mount } from './ui.js';
+import { html, raw, toast, showLoading, mount } from './ui.js';
 import { t } from './i18n.js';
 import { supabase, isConfigured } from './supabase.js';
 import { initAuth, getUser, onAuthChange } from './auth.js';
@@ -17,6 +17,7 @@ import { coursePage, assignmentPage } from './pages/course.js';
 import { trainerPage, trainerStudentPage } from './pages/trainer.js';
 import { libraryPage } from './pages/library.js';
 import { getProfile } from './data.js';
+import { icons } from './art.js';
 
 // ---------- Les pages ----------
 route('/', homePage);
@@ -66,7 +67,31 @@ function link(href, label) {
   return html`<a class="nav-link" href="${href}">${label}</a>`;
 }
 
+// ---------- Barre du bas (téléphone) : Accueil · Oreille · Solfège · Compte ----------
+const EAR_PATHS = ['/programme', '/bibliotheque', '/seance', '/diagnostic', '/entrainement'];
+const ACCOUNT_PATHS = ['/tableau-de-bord', '/statistiques', '/cours', '/devoir', '/formateur', '/connexion', '/inscription', '/mot-de-passe-oublie', '/nouveau-mot-de-passe'];
+function tabFor(path) {
+  if (EAR_PATHS.some((p) => path === p || path.startsWith(p + '/'))) return 'ear';
+  if (ACCOUNT_PATHS.some((p) => path === p || path.startsWith(p + '/'))) return 'account';
+  return path === '/' ? 'home' : '';
+}
+function renderTabbar() {
+  const bar = document.getElementById('tabbar');
+  if (!bar) return;
+  const user = getUser();
+  const active = tabFor(currentPath());
+  const item = (key, href, icon, label) =>
+    html`<a href="${href}" ${active === key ? raw('aria-current="page"') : ''}>${raw(icon)}<span>${label}</span></a>`;
+  bar.innerHTML = String(html`
+    ${item('home', '#/', icons.home, t('nav.home'))}
+    ${item('ear', user ? '#/bibliotheque' : '#/programme', icons.ear, t('nav.ear'))}
+    ${item('solfege', '/solfege/', icons.staff, t('nav.solfege'))}
+    ${item('account', user ? '#/tableau-de-bord' : '#/connexion', icons.user, t('nav.account'))}`);
+}
+window.addEventListener('hashchange', renderTabbar);
+
 function renderNav() {
+  renderTabbar();
   const nav = document.getElementById('nav');
   const user = getUser();
   if (!user) {
