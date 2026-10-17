@@ -1,5 +1,5 @@
-:HL["/solfege/_next/static/chunks/3wx_93oqx9lcg.css","style"]
+:HL["/solfege/_next/static/chunks/1-r7yfp1slded.css","style"]
 :HL["/solfege/_next/static/media/fba5a26ea33df6a3-s.p.18rizl4rsrl42.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 2:[["children",{"s":"__PAGE__","h":160}]]
 1:[["children",{"s":"tableau-de-bord","h":96,"c":"$Q2"}]]
-0:{"b":"3nnNqGp_cxcBtgxmeTlTg","t":{"t":{"s":"","h":80,"c":"$Q1"}}}
+0:{"b":"sNSOGLr3PnMJVm1ufa6Lv","t":{"t":{"s":"","h":80,"c":"$Q1"}}}
