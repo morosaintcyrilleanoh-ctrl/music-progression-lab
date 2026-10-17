@@ -50,6 +50,17 @@ export async function homePage() {
     <section class="section">
       <div class="container" style="max-width:720px">
         <div class="card card-highlight">
+          <p class="eyebrow">${t('home.solfege_eyebrow')}</p>
+          <h2>${t('home.solfege_title')}</h2>
+          <p class="muted">${t('home.solfege_text')}</p>
+          <a class="btn" href="/solfege/">${t('home.solfege_cta')}</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container" style="max-width:720px">
+        <div class="card card-highlight">
           <h2>${t('home.who_title')}</h2>
           <p style="margin:0">${t('home.who_text')}</p>
         </div>

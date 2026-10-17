@@ -15,6 +15,7 @@ export default {
     course: 'Mon cours',
     trainer: 'Espace formateur',
     library: 'Bibliothèque',
+    solfege: 'Solfège',
     dashboard_short: 'Accueil',
     program_short: 'Programme',
     logout_short: 'Sortir'
@@ -38,6 +39,10 @@ export default {
     program_eyebrow: 'Pour bien démarrer',
     program_title: 'Ton programme de 7 jours',
     program_lead: '15 minutes par jour, accessibles à un vrai débutant.',
+    solfege_eyebrow: 'Nouveau',
+    solfege_title: 'Le solfège, pas à pas',
+    solfege_text: 'Lecture des notes sur de vraies portées, rythme et mesures, gammes et tonalités, intervalles et accords. Correction immédiate, sur téléphone et même sans connexion.',
+    solfege_cta: 'Ouvrir le solfège',
     who_title: 'Pour qui ?',
     who_text: 'Musiciens, chanteurs, beatmakers, producteurs et artistes indépendants qui veulent enfin une méthode pour entraîner leur écoute.'
   },

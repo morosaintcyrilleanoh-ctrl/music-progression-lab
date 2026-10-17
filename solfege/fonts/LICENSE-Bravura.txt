@@ -1,0 +1,3 @@
+Bravura — police musicale SMuFL créée par Steinberg Media Technologies GmbH.
+Distribuée sous licence SIL Open Font License 1.1 : https://openfontlicense.org
+Fichier extrait du paquet npm « vexflow » (5.0.0) par scripts/extract-music-font.mjs.
