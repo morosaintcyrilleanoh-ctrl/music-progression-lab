@@ -9,6 +9,7 @@ import { renderStats } from './stats.js';
 import { resourceItem, bindResourceActions } from './course.js';
 import { levelLabel } from './personal.js';
 import { renderSolfege } from './solfege-summary.js';
+import { solfegeTab, trainerSolfegeCoursePage } from './trainer-solfege.js';
 import {
   getProfile, getTrainerCode, getStudentList, getMyResources, uploadResourceFile, createResource, deleteResource,
   getMyAssignments, createAssignment, deleteAssignment, getExercisesList, getTrainerNotes, addTrainerNote,
@@ -36,8 +37,8 @@ async function requireStaff() {
 export async function trainerPage({ tab } = {}) {
   const me = await requireStaff();
   if (!me) return;
-  const current = ['eleves', 'ressources', 'devoirs', 'roles'].includes(tab) ? tab : 'eleves';
-  const tabs = [['eleves', t('trainer.tab_students')], ['ressources', t('trainer.tab_resources')], ['devoirs', t('trainer.tab_homework')]];
+  const current = ['eleves', 'ressources', 'devoirs', 'solfege', 'roles'].includes(tab) ? tab : 'eleves';
+  const tabs = [['eleves', t('trainer.tab_students')], ['ressources', t('trainer.tab_resources')], ['devoirs', t('trainer.tab_homework')], ['solfege', '🎼 ' + t('nav.solfege')]];
   if (me.role === 'admin') tabs.push(['roles', t('trainer.tab_roles')]);
 
   mount(html`
@@ -53,6 +54,7 @@ export async function trainerPage({ tab } = {}) {
     if (current === 'eleves') await studentsTab(zone, me);
     if (current === 'ressources') await resourcesTab(zone, me);
     if (current === 'devoirs') await homeworkTab(zone, me);
+    if (current === 'solfege') await solfegeTab(zone, me);
     if (current === 'roles') rolesTab(zone);
   } catch (err) {
     console.error(err);
@@ -327,6 +329,12 @@ function rolesTab(zone) {
     }
     setBusy(btn, false);
   });
+}
+
+// Une formation de solfège : ses leçons et fichiers joints
+export async function trainerSolfegeCourse({ id }) {
+  const me = await requireStaff();
+  if (me) await trainerSolfegeCoursePage({ id }, me);
 }
 
 // ---------------------------------------------------------------------

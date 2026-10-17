@@ -14,7 +14,8 @@ import { sessionPage } from './pages/session.js';
 import { statsPage } from './pages/stats.js';
 import { diagnosticPage, diagnosticResultPage, trainingPage } from './pages/personal.js';
 import { coursePage, assignmentPage } from './pages/course.js';
-import { trainerPage, trainerStudentPage } from './pages/trainer.js';
+import { trainerPage, trainerStudentPage, trainerSolfegeCourse } from './pages/trainer.js';
+import { solfegeSpacePage, solfegeCoursePage } from './pages/solfege-space.js';
 import { libraryPage } from './pages/library.js';
 import { getProfile } from './data.js';
 import { syncSolfege } from './solfege-sync.js';
@@ -39,6 +40,11 @@ route('/cours', coursePage, { auth: true });
 route('/devoir/:id', assignmentPage, { auth: true });
 route('/formateur', trainerPage, { auth: true });
 route('/formateur/eleve/:id', trainerStudentPage, { auth: true });
+route('/formateur/solfege/:id', trainerSolfegeCourse, { auth: true });
+route('/espace-solfege', solfegeSpacePage, { auth: true });
+route('/espace-solfege/formation/:id', solfegeCoursePage, { auth: true });
+route('/espace-solfege/formation/:id/:lesson', solfegeCoursePage, { auth: true });
+route('/espace-solfege/:section', solfegeSpacePage, { auth: true });
 route('/formateur/:tab', trainerPage, { auth: true });
 const PUBLIC_PATHS = ['/', '/inscription', '/connexion', '/mot-de-passe-oublie', '/nouveau-mot-de-passe', '/programme'];
 setNotFound(() => mount(html`
@@ -72,6 +78,7 @@ function link(href, label) {
 const EAR_PATHS = ['/programme', '/bibliotheque', '/seance', '/diagnostic', '/entrainement'];
 const ACCOUNT_PATHS = ['/tableau-de-bord', '/statistiques', '/cours', '/devoir', '/formateur', '/connexion', '/inscription', '/mot-de-passe-oublie', '/nouveau-mot-de-passe'];
 function tabFor(path) {
+  if (path.startsWith('/espace-solfege')) return 'solfege';
   if (EAR_PATHS.some((p) => path === p || path.startsWith(p + '/'))) return 'ear';
   if (ACCOUNT_PATHS.some((p) => path === p || path.startsWith(p + '/'))) return 'account';
   return path === '/' ? 'home' : '';
