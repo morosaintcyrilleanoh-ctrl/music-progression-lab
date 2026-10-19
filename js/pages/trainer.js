@@ -65,7 +65,7 @@ export async function trainerPage({ tab } = {}) {
 // ---------------- Élèves ----------------
 async function studentsTab(zone, me) {
   const [code, students] = await Promise.all([getTrainerCode(), getStudentList()]);
-  const link = `${SITE()}#/cours?code=${code}`;
+  const link = `${SITE()}#/inscription?code=${encodeURIComponent(code)}`;
   const share = t('trainer.share_text', { code, link });
   zone.innerHTML = String(html`
     <div class="dash-inner">

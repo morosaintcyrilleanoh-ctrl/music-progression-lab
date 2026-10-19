@@ -1,6 +1,6 @@
 -- Formateur T (élèves A et B), autre formateur U, élève C (de U), admin X.
 -- Les tests précédents ont déjà créé A, B, T, U, X ; on ajoute C et les liens.
-insert into auth.users (id) values ('00000000-0000-0000-0000-00000000000c');
+insert into auth.users (id, invited_at) values ('00000000-0000-0000-0000-00000000000c', now());
 insert into public.profiles (id, role) values ('00000000-0000-0000-0000-00000000000c', 'student');
 insert into public.trainer_students values
   ('00000000-0000-0000-0000-0000000000f1', '00000000-0000-0000-0000-00000000000b'),
