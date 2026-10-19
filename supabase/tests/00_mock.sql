@@ -3,7 +3,7 @@
 create role anon nologin;
 create role authenticated nologin;
 create schema auth;
-create table auth.users (id uuid primary key, email text unique);
+create table auth.users (id uuid primary key, email text unique, raw_user_meta_data jsonb not null default '{}', invited_at timestamptz);
 create function auth.uid() returns uuid language sql stable as $$
   select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid
 $$;
@@ -15,6 +15,7 @@ alter default privileges in schema public grant all on functions to anon, authen
 
 create table public.profiles (id uuid primary key references auth.users, full_name text, role text not null default 'student');
 create table public.trainer_students (trainer_id uuid references public.profiles, student_id uuid references public.profiles, created_at timestamptz default now(), primary key (trainer_id, student_id));
+create table public.trainer_invites (code text primary key, trainer_id uuid references public.profiles, created_at timestamptz default now());
 alter table public.profiles enable row level security;
 alter table public.trainer_students enable row level security;
 

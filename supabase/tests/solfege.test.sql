@@ -1,8 +1,9 @@
 -- Élève A (formateur T), élève B (sans formateur), formateur T, autre formateur U, admin X.
-insert into auth.users (id) values
-  ('00000000-0000-0000-0000-00000000000a'), ('00000000-0000-0000-0000-00000000000b'),
-  ('00000000-0000-0000-0000-0000000000f1'), ('00000000-0000-0000-0000-0000000000f2'),
-  ('00000000-0000-0000-0000-0000000000ad');
+-- Comptes créés par l'administrateur (invités) : pas besoin de code formateur.
+insert into auth.users (id, invited_at) values
+  ('00000000-0000-0000-0000-00000000000a', now()), ('00000000-0000-0000-0000-00000000000b', now()),
+  ('00000000-0000-0000-0000-0000000000f1', now()), ('00000000-0000-0000-0000-0000000000f2', now()),
+  ('00000000-0000-0000-0000-0000000000ad', now());
 insert into public.profiles (id, role) values
   ('00000000-0000-0000-0000-00000000000a', 'student'), ('00000000-0000-0000-0000-00000000000b', 'student'),
   ('00000000-0000-0000-0000-0000000000f1', 'trainer'), ('00000000-0000-0000-0000-0000000000f2', 'trainer'),

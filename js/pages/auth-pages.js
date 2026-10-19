@@ -48,12 +48,29 @@ function notConfigured(form) {
   return true;
 }
 
-// ---------- Inscription ----------
+const query = () => new URLSearchParams(window.location.hash.split('?')[1] ?? '');
+
+// Après connexion : retour à la page demandée (dont le volet Solfège), sinon tableau de bord
+function goAfterLogin() {
+  const retour = query().get('retour') ?? '';
+  if (retour === 'solfege') { window.location.href = '/solfege/'; return; }
+  navigate(retour.startsWith('/') && !retour.startsWith('//') && retour !== '/connexion' ? retour : '/tableau-de-bord', { replace: true });
+}
+
+// ---------- Inscription (code formateur obligatoire, vérifié par la base) ----------
 export function signupPage() {
-  if (getUser()) return navigate('/tableau-de-bord', { replace: true });
+  const codeFromLink = (query().get('code') ?? '').trim().toUpperCase();
+  // Déjà connecté avec un lien d'invitation : on rejoint ce formateur depuis « Mon cours »
+  if (getUser()) return navigate(codeFromLink ? `/cours?code=${encodeURIComponent(codeFromLink)}` : '/tableau-de-bord', { replace: true });
   mount(authLayout(t('auth.signup_title'), t('auth.signup_lead'), html`
     <form class="form" id="signup-form" novalidate>
       <div data-form-message></div>
+      <div class="field">
+        <label for="trainer_code">${t('auth.trainer_code')}</label>
+        <input class="input" id="trainer_code" name="trainer_code" autocomplete="off" required value="${codeFromLink}"
+               style="text-transform:uppercase" aria-describedby="trainer_code-hint">
+        <span class="hint" id="trainer_code-hint">${t('auth.trainer_code_hint')}</span>
+      </div>
       ${field({ id: 'full_name', label: t('auth.full_name'), autocomplete: 'name' })}
       ${field({ id: 'email', label: t('auth.email'), type: 'email', autocomplete: 'email' })}
       ${field({ id: 'password', label: t('auth.password'), type: 'password', autocomplete: 'new-password', hint: t('auth.password_hint') })}
@@ -67,6 +84,7 @@ export function signupPage() {
     e.preventDefault();
     const v = (n) => form.elements[n].value;
     const error = validate(form, [
+      ['trainer_code', (x) => x.length >= 3, t('auth.bad_trainer_code')],
       ['full_name', (x) => x.length > 0, t('errors.required')],
       ['email', isValidEmail, t('errors.email_invalid')],
       ['password', (x) => x.length >= 8, t('errors.password_short')],
@@ -82,11 +100,17 @@ export function signupPage() {
       email: v('email').trim(),
       password: v('password'),
       options: {
-        data: { full_name: v('full_name').trim(), locale: 'fr' },
+        data: { full_name: v('full_name').trim(), locale: 'fr', trainer_code: v('trainer_code').replace(/\s+/g, '').toUpperCase() },
         emailRedirectTo: siteUrl('?confirme=1')
       }
     });
     setBusy(button, false);
+    // Code refusé par la base : Supabase répond « Database error saving new user »
+    if (apiError && /database error/i.test(apiError.message ?? '')) {
+      form.elements.trainer_code.setAttribute('aria-invalid', 'true');
+      form.elements.trainer_code.focus();
+      return setFormMessage(form, t('auth.bad_trainer_code'));
+    }
     if (apiError) return setFormMessage(form, translateAuthError(apiError));
 
     // Supabase peut renvoyer un utilisateur sans "identités" si l'adresse existe déjà
@@ -103,7 +127,7 @@ export function signupPage() {
 
 // ---------- Connexion ----------
 export function loginPage() {
-  if (getUser()) return navigate('/tableau-de-bord', { replace: true });
+  if (getUser()) return goAfterLogin();
   mount(authLayout(t('auth.login_title'), t('auth.login_lead'), html`
     <form class="form" id="login-form" novalidate>
       <div data-form-message></div>
@@ -135,7 +159,7 @@ export function loginPage() {
     });
     setBusy(button, false);
     if (apiError) return setFormMessage(form, translateAuthError(apiError));
-    navigate('/tableau-de-bord');
+    goAfterLogin();
   });
 }
 

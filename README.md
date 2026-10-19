@@ -31,6 +31,18 @@ Base de données et comptes : **Supabase**. Hébergement : **Vercel**.
 - Ne jamais y mettre la clé `service_role` / `secret`.
 - La protection des données est assurée par les règles de la base (Row Level Security).
 
+## Plateforme privée (élèves uniquement)
+
+- **Inscription** : il faut le **code formateur** (Espace formateur → Élèves). La base le
+  vérifie à la création du compte (`supabase/migrations/20261019120000_inscription_code_formateur.sql`)
+  et l'élève est relié automatiquement à ce formateur à sa première connexion. Le lien
+  partagé par le formateur (`#/inscription?code=…`) préremplit le code.
+- **Contenu** : sans connexion, seuls l'accueil et les pages de compte sont visibles ;
+  exercices de l'oreille et volet Solfège renvoient vers la connexion (puis reviennent
+  à la page demandée).
+- Créer un compte sans code (formateur, test) : Supabase → Authentication → *Invite user*,
+  ou s'inscrire avec son propre code formateur puis changer le rôle.
+
 ## Volet Solfège
 
 Le dossier `solfege/` contient le volet solfège, accessible depuis le menu (**Solfège**)

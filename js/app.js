@@ -17,7 +17,7 @@ import { coursePage, assignmentPage } from './pages/course.js';
 import { trainerPage, trainerStudentPage, trainerSolfegeCourse } from './pages/trainer.js';
 import { solfegeSpacePage, solfegeCoursePage } from './pages/solfege-space.js';
 import { libraryPage } from './pages/library.js';
-import { getProfile } from './data.js';
+import { getProfile, getMyTrainers, joinTrainer } from './data.js';
 import { syncSolfege } from './solfege-sync.js';
 import { icons } from './art.js';
 
@@ -28,8 +28,9 @@ route('/connexion', loginPage);
 route('/mot-de-passe-oublie', forgotPage);
 route('/nouveau-mot-de-passe', resetPage);
 route('/tableau-de-bord', dashboardPage, { auth: true });
-route('/programme', programPage);
-route('/programme/:jour', programDayPage);
+// Plateforme privée : tout le contenu est réservé aux élèves connectés.
+route('/programme', programPage, { auth: true });
+route('/programme/:jour', programDayPage, { auth: true });
 route('/seance/:jour', sessionPage, { auth: true });
 route('/statistiques', statsPage, { auth: true });
 route('/diagnostic', diagnosticPage, { auth: true });
@@ -46,7 +47,7 @@ route('/espace-solfege/formation/:id', solfegeCoursePage, { auth: true });
 route('/espace-solfege/formation/:id/:lesson', solfegeCoursePage, { auth: true });
 route('/espace-solfege/:section', solfegeSpacePage, { auth: true });
 route('/formateur/:tab', trainerPage, { auth: true });
-const PUBLIC_PATHS = ['/', '/inscription', '/connexion', '/mot-de-passe-oublie', '/nouveau-mot-de-passe', '/programme'];
+const PUBLIC_PATHS = ['/', '/inscription', '/connexion', '/mot-de-passe-oublie', '/nouveau-mot-de-passe'];
 setNotFound(() => mount(html`
   <div class="container dash center">
     <h1>${t('common.not_found_title')}</h1>
@@ -56,10 +57,30 @@ setNotFound(() => mount(html`
 
 // Pages réservées aux personnes connectées
 setGuard((options) => {
-  if (options.auth && !getUser()) { navigate('/connexion', { replace: true }); return false; }
+  if (options.auth && !getUser()) { navigate(`/connexion?retour=${encodeURIComponent(currentPath())}`, { replace: true }); return false; }
   showLoading();
   return true;
 });
+
+// ---------- Inscription avec code formateur : l'élève est relié à son formateur ----------
+// Le code saisi à l'inscription (vérifié par la base) est gardé dans le compte ;
+// à la première connexion, on rejoint ce formateur si ce n'est pas déjà fait.
+async function joinTrainerFromSignup() {
+  const user = getUser();
+  const code = user?.user_metadata?.trainer_code;
+  const done = `mpl:trainer-joined:${user?.id}`;
+  if (!code) return;
+  try {
+    if (localStorage.getItem(done)) return;
+  } catch { /* stockage indisponible : on vérifie auprès de la base */ }
+  try {
+    const trainers = await getMyTrainers();
+    if (!trainers?.length) await joinTrainer(code);
+    try { localStorage.setItem(done, '1'); } catch { /* sans gravité */ }
+  } catch (err) {
+    console.warn('Rattachement au formateur reporté', err?.message ?? err);
+  }
+}
 
 // ---------- Menu ----------
 let role = null;
@@ -93,7 +114,7 @@ function renderTabbar() {
   bar.innerHTML = String(html`
     ${item('home', '#/', icons.home, t('nav.home'))}
     ${item('ear', user ? '#/bibliotheque' : '#/programme', icons.ear, t('nav.ear'))}
-    ${item('solfege', '/solfege/', icons.staff, t('nav.solfege'))}
+    ${item('solfege', user ? '/solfege/' : '#/connexion?retour=solfege', icons.staff, t('nav.solfege'))}
     ${item('account', user ? '#/tableau-de-bord' : '#/connexion', icons.user, t('nav.account'))}`);
 }
 window.addEventListener('hashchange', renderTabbar);
@@ -104,7 +125,6 @@ function renderNav() {
   const user = getUser();
   if (!user) {
     nav.innerHTML = String(html`
-      ${link('/solfege/', t('nav.solfege'))}
       <a class="nav-link" href="#/connexion">${t('nav.login')}</a>
       <a class="btn btn-sm" href="#/inscription">${t('nav.signup')}</a>`);
     return;
@@ -148,7 +168,10 @@ async function start() {
   await loadRole();
   renderNav();
   // Séances de solfège faites sur cet appareil en étant connecté → compte de l'élève
-  if (getUser()) syncSolfege().catch(() => null);
+  if (getUser()) {
+    syncSolfege().catch(() => null);
+    joinTrainerFromSignup();
+  }
 
   // Nettoie l'adresse (retire ?confirme=1, ?reinit=1 ou #access_token=...)
   const cleanHash = window.location.hash.startsWith('#/') ? window.location.hash : '#/';
@@ -165,7 +188,10 @@ async function start() {
 
   onAuthChange(async (event) => {
     if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'USER_UPDATED') await loadRole();
-    if (event === 'SIGNED_IN') syncSolfege().catch(() => null);
+    if (event === 'SIGNED_IN') {
+      syncSolfege().catch(() => null);
+      joinTrainerFromSignup();
+    }
     renderNav();
     if (event === 'PASSWORD_RECOVERY') navigate('/nouveau-mot-de-passe');
     // Si l'utilisateur se déconnecte sur une page privée, on le renvoie à l'accueil
