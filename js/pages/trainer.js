@@ -10,6 +10,7 @@ import { resourceItem, bindResourceActions } from './course.js';
 import { levelLabel } from './personal.js';
 import { renderSolfege } from './solfege-summary.js';
 import { solfegeTab, trainerSolfegeCoursePage } from './trainer-solfege.js';
+import { trainerCohortPage, trainerCoachingPage, trainerHomeworkPage } from './trainer-solfege-pro.js';
 import {
   getProfile, getTrainerCode, getStudentList, getMyResources, uploadResourceFile, createResource, deleteResource,
   getMyAssignments, createAssignment, deleteAssignment, getExercisesList, getTrainerNotes, addTrainerNote,
@@ -335,6 +336,19 @@ function rolesTab(zone) {
 export async function trainerSolfegeCourse({ id }) {
   const me = await requireStaff();
   if (me) await trainerSolfegeCoursePage({ id }, me);
+}
+// Session payante, coaching, devoir (pages de l'onglet Solfège)
+export async function trainerSolfegeSession({ id }) {
+  const me = await requireStaff();
+  if (me) await trainerCohortPage({ id }, me);
+}
+export async function trainerSolfegeCoaching({ id }) {
+  const me = await requireStaff();
+  if (me) await trainerCoachingPage({ id }, me);
+}
+export async function trainerSolfegeHomework({ id }) {
+  const me = await requireStaff();
+  if (me) await trainerHomeworkPage({ id }, me);
 }
 
 // ---------------------------------------------------------------------

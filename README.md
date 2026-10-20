@@ -31,6 +31,28 @@ Base de données et comptes : **Supabase**. Hébergement : **Vercel**.
 - Ne jamais y mettre la clé `service_role` / `secret`.
 - La protection des données est assurée par les règles de la base (Row Level Security).
 
+## Formation payante, agenda, coaching, devoirs (volet Solfège)
+
+Seuls la **formation** (sessions de 3 mois, 30 places) et le **coaching** sont payants ;
+tout le reste est gratuit. Aucun prix n'est affiché : les élèves paient le formateur
+(Mobile Money, etc.), qui ouvre l'accès lui-même.
+
+- **Agenda** (formateur → 🎼 Solfège → Agenda) : sessions de formation (début, durée,
+  places), ouvertures de coaching, événements. Les élèves voient les 3 prochains mois,
+  les places restantes et un bouton « Je veux m'inscrire » vers le WhatsApp du formateur.
+- **Session** : le formateur ajoute les élèves qui ont payé (« A payé 1 mois / 3 mois »),
+  prolonge (+1 mois, +3), voit qui est à jour / expire bientôt / a expiré. L'accès se
+  ferme tout seul à la date payée. Pas de 31ᵉ élève (vérifié par la base).
+- **Contenu de session** : dans Formations, Lives, Ressources et Devoirs, « Pour : ⭐ la
+  session ». Après chaque live, coller le lien YouTube (vidéo « non répertoriée ») de la
+  rediffusion : elle s'affiche dans « Ma formation ».
+- **Coaching** : l'élève demande 1, 2, 3 ou 6 mois à partir du mois choisi ; le formateur
+  valide après paiement, écrit les objectifs de chaque mois et programme les rendez-vous.
+- **Devoirs** : rendu en PDF/photo (10 Mo), audio de 2 minutes au plus, ou « envoyé sur
+  WhatsApp » ; correction avec note et commentaire.
+
+**Activation (une fois)** : `supabase/migrations/20261021120000_solfege_formation_payante.sql`.
+
 ## Plateforme privée (élèves uniquement)
 
 - **Inscription** : il faut le **code formateur** (Espace formateur → Élèves). La base le
