@@ -419,3 +419,128 @@ export async function getSolfegeCourseProgress(lessonIds) {
   if (!lessonIds.length) return [];
   return check(await supabase.from('solfege_lesson_progress').select('lesson_id, student_id, done_at').in('lesson_id', lessonIds));
 }
+
+// ---------------------------------------------------------------------
+// Formation payante (sessions), agenda, coaching, devoirs (volet Solfège)
+// ---------------------------------------------------------------------
+export async function getSolfegeCohorts() {
+  return check(await supabase.from('solfege_cohorts').select('*').order('starts_on'));
+}
+export async function createSolfegeCohort(row) {
+  return check(await supabase.from('solfege_cohorts').insert(row).select().single());
+}
+export async function deleteSolfegeCohort(id) {
+  return check(await supabase.from('solfege_cohorts').delete().eq('id', id));
+}
+// Places prises par session (sans savoir qui est inscrit) : { id: nombre }
+export async function getCohortSeats(ids) {
+  if (!ids.length) return {};
+  const rows = check(await supabase.rpc('solfege_cohort_seats', { p_ids: ids })) ?? [];
+  return Object.fromEntries(rows.map((r) => [r.cohort_id, r.taken]));
+}
+export async function getMyMemberships(userId) {
+  return check(await supabase.from('solfege_memberships').select('*, cohort:solfege_cohorts(*)').eq('student_id', userId));
+}
+export async function getCohortMembers(cohortId) {
+  return check(await supabase.from('solfege_memberships').select('*').eq('cohort_id', cohortId).order('created_at'));
+}
+export async function addCohortMember(row) {
+  return check(await supabase.from('solfege_memberships').insert(row).select().single());
+}
+export async function setMemberPaidUntil(cohortId, studentId, paidUntil) {
+  return check(await supabase.from('solfege_memberships').update({ paid_until: paidUntil }).eq('cohort_id', cohortId).eq('student_id', studentId).select().single());
+}
+export async function removeCohortMember(cohortId, studentId) {
+  return check(await supabase.from('solfege_memberships').delete().eq('cohort_id', cohortId).eq('student_id', studentId));
+}
+
+export async function getSolfegeEvents() {
+  return check(await supabase.from('solfege_events').select('*').order('starts_at'));
+}
+export async function createSolfegeEvent(row) {
+  return check(await supabase.from('solfege_events').insert(row).select().single());
+}
+export async function deleteSolfegeEvent(id) {
+  return check(await supabase.from('solfege_events').delete().eq('id', id));
+}
+// Numéros WhatsApp des formateurs : { trainer_id: numéro }
+export async function getTrainerWhatsapp() {
+  const rows = check(await supabase.from('solfege_trainer_settings').select('trainer_id, whatsapp'));
+  return Object.fromEntries(rows.filter((r) => r.whatsapp).map((r) => [r.trainer_id, r.whatsapp]));
+}
+export async function saveTrainerWhatsapp(trainerId, whatsapp) {
+  return check(await supabase.from('solfege_trainer_settings')
+    .upsert({ trainer_id: trainerId, whatsapp: whatsapp || null, updated_at: new Date().toISOString() }, { onConflict: 'trainer_id' }));
+}
+
+export async function getCoachings() {
+  return check(await supabase.from('solfege_coachings').select('*').order('created_at', { ascending: false }));
+}
+export async function getCoaching(id) {
+  return check(await supabase.from('solfege_coachings').select('*').eq('id', id).maybeSingle());
+}
+export async function requestCoaching(row) {
+  return check(await supabase.from('solfege_coachings').insert(row).select().single());
+}
+export async function updateCoaching(id, fields) {
+  return check(await supabase.from('solfege_coachings').update(fields).eq('id', id).select().single());
+}
+export async function deleteCoaching(id) {
+  return check(await supabase.from('solfege_coachings').delete().eq('id', id));
+}
+export async function getCoachingGoals(coachingId) {
+  return check(await supabase.from('solfege_coaching_goals').select('*').eq('coaching_id', coachingId).order('month').order('position').order('created_at'));
+}
+export async function addCoachingGoal(row) {
+  return check(await supabase.from('solfege_coaching_goals').insert(row).select().single());
+}
+export async function deleteCoachingGoal(id) {
+  return check(await supabase.from('solfege_coaching_goals').delete().eq('id', id));
+}
+export async function setCoachingGoalDone(id, done) {
+  return check(await supabase.from('solfege_coaching_goals').update({ done }).eq('id', id));
+}
+
+export async function getSolfegeHomework() {
+  return check(await supabase.from('solfege_homework').select('*').order('created_at', { ascending: false }));
+}
+export async function getSolfegeHomeworkOne(id) {
+  return check(await supabase.from('solfege_homework').select('*').eq('id', id).maybeSingle());
+}
+export async function createSolfegeHomework(row) {
+  return check(await supabase.from('solfege_homework').insert(row).select().single());
+}
+export async function deleteSolfegeHomework(id) {
+  const files = check(await supabase.from('solfege_resources').select('storage_path').eq('homework_id', id));
+  const paths = files.map((f) => f.storage_path).filter(Boolean);
+  if (paths.length) await supabase.storage.from(SOLFEGE_BUCKET).remove(paths);
+  return check(await supabase.from('solfege_homework').delete().eq('id', id));
+}
+export async function getHomeworkResources(ids) {
+  if (!ids.length) return [];
+  return check(await supabase.from('solfege_resources').select('*').in('homework_id', ids).order('created_at'));
+}
+export async function getSubmissions({ homeworkId, studentId } = {}) {
+  let q = supabase.from('solfege_submissions').select('*');
+  if (homeworkId) q = q.eq('homework_id', homeworkId);
+  if (studentId) q = q.eq('student_id', studentId);
+  return check(await q.order('submitted_at', { ascending: false }));
+}
+export async function uploadSubmissionFile(studentId, file) {
+  const ext = (file.name.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 8);
+  const path = `rendus/${studentId}/${crypto.randomUUID()}.${ext}`;
+  const { error } = await supabase.storage.from(SOLFEGE_BUCKET).upload(path, file, { contentType: file.type || undefined, upsert: false });
+  if (error) throw error;
+  return path;
+}
+// Rendu de l'élève (un seul par devoir : un nouvel envoi remplace le précédent)
+export async function saveSubmission(row, previousPath = null) {
+  const data = check(await supabase.from('solfege_submissions')
+    .upsert({ ...row, submitted_at: new Date().toISOString() }, { onConflict: 'homework_id,student_id' }).select().single());
+  if (previousPath && previousPath !== row.storage_path) await supabase.storage.from(SOLFEGE_BUCKET).remove([previousPath]);
+  return data;
+}
+export async function gradeSubmission(id, grade, feedback) {
+  return check(await supabase.from('solfege_submissions')
+    .update({ grade: grade || null, feedback: feedback || null, corrected_at: new Date().toISOString() }).eq('id', id).select().single());
+}

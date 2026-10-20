@@ -10,9 +10,12 @@ import {
   getSolfegeLives, getSolfegeResources, getMyTrainers
 } from '../data.js';
 import { resourceCard, bindMedia, videoEmbed, liveState, fmtWhen, fmtDay, safeUrl } from './solfege-media.js';
+import { myFormationSection, agendaSection, homeworkSection, coachingSection } from './solfege-pro.js';
+import { getMyMemberships, getTrainerWhatsapp } from '../data.js';
 
-const SECTIONS = ['formations', 'lives', 'ressources'];
-const TILE_ICONS = { formations: '🎓', lives: '🎥', ressources: '📁' };
+const SECTIONS = ['ma-formation', 'formations', 'lives', 'ressources', 'agenda', 'devoirs', 'coaching'];
+const TILE_ICONS = { 'ma-formation': '⭐', formations: '🎓', lives: '🎥', ressources: '📁', agenda: '📅', devoirs: '✍️', coaching: '🤝' };
+const PRO = { 'ma-formation': myFormationSection, agenda: agendaSection, devoirs: homeworkSection, coaching: coachingSection };
 const isMissing = (err) => err?.code === '42P01' || err?.code === 'PGRST205';
 const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0);
 const byPosition = (a, b) => a.position - b.position || a.created_at?.localeCompare(b.created_at ?? '');
@@ -50,7 +53,14 @@ export function liveCard(live, { compact = false } = {}) {
 
 // ---------------------------------------------------------------------
 export async function solfegeSpacePage({ section } = {}) {
-  const current = SECTIONS.includes(section) ? section : 'formations';
+  const user = getUser();
+  // Inscriptions aux sessions payantes, formateurs, numéros WhatsApp (sans bloquer si l'espace n'est pas activé)
+  const [memberships, trainers, whatsapp] = await Promise.all([
+    getMyMemberships(user.id).catch(() => []), getMyTrainers().catch(() => []), getTrainerWhatsapp().catch(() => ({}))
+  ]);
+  const ctx = { user, memberships, trainers: trainers ?? [], whatsapp };
+  const tiles = SECTIONS.filter((s) => s !== 'ma-formation' || memberships.length);
+  const current = tiles.includes(section) ? section : memberships.length ? 'ma-formation' : 'formations';
   mount(html`
     <div class="container dash">
       <div>
@@ -58,12 +68,13 @@ export async function solfegeSpacePage({ section } = {}) {
         <h1 style="margin-top:10px">${t('sol.title')}</h1>
       </div>
       <nav class="sol-tiles" aria-label="${t('sol.title')}">
-        ${SECTIONS.map((s) => html`<a class="sol-tile" href="#/espace-solfege/${s}" ${s === current ? html`aria-current="page"` : ''}><span aria-hidden="true">${TILE_ICONS[s]}</span>${t('sol.' + s)}</a>`)}
+        ${tiles.map((s) => html`<a class="sol-tile ${s === 'ma-formation' ? 'sol-tile-pro' : ''}" href="#/espace-solfege/${s}" ${s === current ? html`aria-current="page"` : ''}><span aria-hidden="true">${TILE_ICONS[s]}</span>${t('sol.' + s.replace('-', '_'))}</a>`)}
       </nav>
       <div id="sol-zone" class="dash-inner"><div class="spinner" role="status"></div></div>
     </div>`);
   const zone = document.getElementById('sol-zone');
   try {
+    if (PRO[current]) await PRO[current](zone, ctx);
     if (current === 'formations') await coursesSection(zone);
     if (current === 'lives') await livesSection(zone);
     if (current === 'ressources') await resourcesSection(zone);
@@ -76,7 +87,7 @@ async function coursesSection(zone) {
   const user = getUser();
   const [courses, progress, lives] = await Promise.all([getSolfegeCourses(), getSolfegeProgress(user.id), getSolfegeLives().catch(() => [])]);
   const done = new Set(progress.map((p) => p.lesson_id));
-  const soon = lives.filter((l) => liveState(l) !== 'past' && Date.parse(l.starts_at) - Date.now() < 86400000);
+  const soon = lives.filter((l) => !l.coaching_id && liveState(l) !== 'past' && Date.parse(l.starts_at) - Date.now() < 86400000);
   zone.innerHTML = String(html`
     ${soon.map((l) => liveCard(l, { compact: true }))}
     ${courses.length ? courses.map((c) => {
@@ -84,6 +95,7 @@ async function coursesSection(zone) {
       const d = c.lessons.filter((l) => done.has(l.id)).length;
       return html`<a class="card sol-course" href="#/espace-solfege/formation/${c.id}">
         <span class="sol-badge">${d === n && n ? t('sol.course_done') : d ? t('sol.course_in_progress') : t('sol.course_new')}</span>
+        ${c.cohort_id ? html` <span class="sol-badge sol-badge-pro">⭐ ${t('pro.paid_formation')}</span>` : ''}
         <h3 style="margin:8px 0 2px;font-size:1.1rem">${c.title}</h3>
         <p class="muted small" style="margin:0">${t('sol.lessons_progress', { d, n })}</p>
         <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct(d, n)}" aria-label="${c.title}"><span style="width:${pct(d, n)}%"></span></div>
@@ -92,7 +104,7 @@ async function coursesSection(zone) {
 }
 
 async function livesSection(zone) {
-  const lives = await getSolfegeLives();
+  const lives = (await getSolfegeLives()).filter((l) => !l.coaching_id);
   const next = lives.filter((l) => liveState(l) !== 'past');
   const past = lives.filter((l) => liveState(l) === 'past').reverse().slice(0, 12);
   zone.innerHTML = String(html`

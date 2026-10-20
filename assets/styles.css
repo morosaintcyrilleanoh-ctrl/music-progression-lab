@@ -553,3 +553,40 @@ h1, h2, h3 { color: inherit; }
 .sol-radio { display: flex; align-items: center; gap: 8px; font-weight: 600; margin: 6px 0; min-height: 32px; }
 fieldset.field { border: 0; padding: 0; margin: 0; }
 fieldset.field legend { font-weight: 700; margin-bottom: 4px; }
+
+/* ---------- Formation payante, agenda, coaching, devoirs ---------- */
+.sol-tiles { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); }
+.sol-tile-pro { border-color: #f5c542; background: linear-gradient(180deg, #fffbeb, #fff); }
+.sol-tile-pro span { background: #fef3c7; }
+.sol-badge-pro { background: #fef3c7; color: #92400e; }
+.sol-band { border-radius: var(--radius-lg); padding: 22px 20px; color: #fff; background: var(--band); box-shadow: var(--shadow); }
+.sol-band h2 { margin: 4px 0 6px; font-size: 1.5rem; color: #fff; }
+.sol-band p { margin: 0; color: #dbe7ff; }
+.sol-band .sol-band-eb { font-size: 0.75rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #bfd6ff; }
+.sol-band .sol-band-info { margin-top: 8px; font-size: 0.9rem; }
+.sol-band .btn { margin-top: 12px; }
+.sol-h { font-size: 1.15rem; margin: 6px 0 0; }
+.sol-month { font-size: 0.85rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 8px 0 -4px; }
+.sol-agenda-main { border-color: var(--blue-100); }
+.sol-tag { display: inline-block; font-size: 0.75rem; font-weight: 800; border-radius: 999px; padding: 4px 10px; background: var(--bg-2); color: var(--muted); }
+.sol-tag-ok { background: #dcfce7; color: #15803d; }
+.sol-tag-warn { background: #fef3c7; color: #b45309; }
+.sol-tag-off { background: #fee2e2; color: #dc2626; }
+.btn.sol-wa { background: #25d366; border-color: #25d366; color: #fff; }
+.btn.sol-wa:hover { background: #1fb457; }
+.sol-locked { text-align: center; padding: 28px 20px; }
+.sol-lock { font-size: 2.6rem; line-height: 1; }
+.sol-correction { margin-top: 12px; padding: 12px 14px; border-radius: 12px; background: #f0fdf4; border: 1px solid #bbf7d0; }
+.sol-done { margin: 10px 0 6px; color: var(--success); font-weight: 700; }
+.sol-or { text-align: center; color: var(--muted); font-size: 0.85rem; }
+.sol-hw details summary { cursor: pointer; font-weight: 700; color: var(--blue-strong); min-height: 32px; }
+.sol-goals { list-style: none; margin: 0; padding: 0; }
+.sol-goals li { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid var(--border); }
+.sol-goals li:first-child { border-top: 0; }
+.sol-goals label { display: flex; gap: 10px; align-items: center; cursor: pointer; min-height: 32px; }
+.sol-goals input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--success); }
+.sol-chip-radio { position: relative; display: inline-flex; }
+.sol-chip-radio input { position: absolute; opacity: 0; inset: 0; }
+.sol-chip-radio span { display: inline-flex; align-items: center; min-height: 40px; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); font-weight: 700; font-size: 0.9rem; cursor: pointer; }
+.sol-chip-radio input:checked + span { background: var(--blue-strong); border-color: var(--blue-strong); color: #fff; }
+.sol-chip-radio input:focus-visible + span { box-shadow: var(--focus); }

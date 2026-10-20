@@ -133,3 +133,60 @@ export function fmtWhen(d) {
   return new Date(d).toLocaleString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
 }
 export const fmtDay = (d) => new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+
+// ---------- Dates (sessions, coaching) ----------
+const pad = (n) => String(n).padStart(2, '0');
+export const isoDay = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+export const todayIso = () => isoDay(new Date());
+export const parseDay = (s) => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+// Ajoute n mois à une date « AAAA-MM-JJ » (le 31 janv. + 1 mois → 28/29 févr.)
+export function addMonths(day, n) {
+  const d = parseDay(day);
+  const target = new Date(d.getFullYear(), d.getMonth() + n, 1);
+  const last = new Date(target.getFullYear(), target.getMonth() + 1, 0).getDate();
+  return isoDay(new Date(target.getFullYear(), target.getMonth(), Math.min(d.getDate(), last)));
+}
+export const firstOfMonth = (day) => day.slice(0, 8) + '01';
+export const lastOfMonth = (day) => { const d = parseDay(day); return isoDay(new Date(d.getFullYear(), d.getMonth() + 1, 0)); };
+// « 1er novembre 2026 », « 15 novembre 2026 »
+export const fmtDate = (day) => parseDay(day).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }).replace(/^1 /, '1er ');
+export const fmtShort = (day) => parseDay(day).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+export const monthName = (day) => parseDay(day).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+export const daysLeft = (day) => Math.round((parseDay(day) - parseDay(todayIso())) / 86400000);
+
+// Lien WhatsApp vers le formateur, message prérempli
+export function waLink(number, text) {
+  const digits = (number ?? '').replace(/\D/g, '');
+  return `https://wa.me/${digits}?text=${encodeURIComponent(text)}`;
+}
+
+// ---------- Enregistrement audio (2 minutes au plus) ----------
+export const MAX_AUDIO_SECONDS = 120;
+export function audioRecorder({ onTick, onStop }) {
+  let rec = null, chunks = [], timer = null, started = 0, stream = null;
+  const stop = () => { if (rec && rec.state !== 'inactive') rec.stop(); };
+  return {
+    async start() {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const type = ['audio/webm', 'audio/mp4', 'audio/ogg'].find((t) => window.MediaRecorder?.isTypeSupported?.(t)) ?? '';
+      rec = new MediaRecorder(stream, type ? { mimeType: type, audioBitsPerSecond: 48000 } : undefined);
+      chunks = [];
+      rec.ondataavailable = (e) => e.data.size && chunks.push(e.data);
+      rec.onstop = () => {
+        clearInterval(timer);
+        stream.getTracks().forEach((t) => t.stop());
+        const mime = (rec.mimeType || 'audio/webm').split(';')[0];
+        const ext = mime.includes('mp4') ? 'm4a' : mime.includes('ogg') ? 'ogg' : 'webm';
+        onStop(new File(chunks, `enregistrement.${ext}`, { type: mime }), Math.round((Date.now() - started) / 1000));
+      };
+      started = Date.now();
+      rec.start(1000);
+      timer = setInterval(() => {
+        const s = Math.floor((Date.now() - started) / 1000);
+        onTick(s);
+        if (s >= MAX_AUDIO_SECONDS) stop();
+      }, 250);
+    },
+    stop,
+  };
+}

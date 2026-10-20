@@ -8,19 +8,28 @@ import {
   getStudentList, getSolfegeCourses, getSolfegeCourse, createSolfegeCourse, deleteSolfegeCourse,
   createSolfegeLesson, deleteSolfegeLesson, getSolfegeLessonResources, getSolfegeCourseProgress,
   getSolfegeLives, createSolfegeLive, updateSolfegeLive, deleteSolfegeLive,
-  getSolfegeResources, createSolfegeResource, deleteSolfegeResource, uploadSolfegeFile
+  getSolfegeResources, createSolfegeResource, deleteSolfegeResource, uploadSolfegeFile, getSolfegeCohorts
 } from '../data.js';
+import { agendaView, coachingView, homeworkView } from './trainer-solfege-pro.js';
 import { resourceCard, bindMedia, liveState, fmtWhen, fmtDay, fileKind, FILE_ACCEPT, MAX_MB, safeUrl } from './solfege-media.js';
 
-const VIEWS = ['formations', 'lives', 'ressources'];
+const VIEWS = ['agenda', 'formations', 'lives', 'ressources', 'devoirs', 'coaching'];
+const PRO_VIEWS = { agenda: agendaView, devoirs: homeworkView, coaching: coachingView };
+// Sessions payantes du formateur (pour « Pour : … » dans les formulaires)
+let COHORTS = [];
 const isMissing = (err) => err?.code === '42P01' || err?.code === 'PGRST205' || /bucket not found/i.test(err?.message ?? '');
 const view = () => new URLSearchParams(window.location.hash.split('?')[1] ?? '').get('vue');
 const isHttps = (u) => /^https:\/\/\S+$/i.test(u) && u.length <= 500;
 
-function studentOptions(students) {
-  return html`<option value="">${t('trainer.all_students')}</option>${students.map((s) => html`<option value="${s.id}">${s.full_name ?? s.email}</option>`)}`;
+export function studentOptions(students, cohorts = COHORTS) {
+  return html`<option value="">${t('trainer.all_students')}</option>
+    ${cohorts.length ? html`<optgroup label="${t('pro.paid_sessions')}">${cohorts.map((c) => html`<option value="cohort:${c.id}">⭐ ${c.title}</option>`)}</optgroup>` : ''}
+    <optgroup label="${t('pro.one_student')}">${students.map((s) => html`<option value="${s.id}">${s.full_name ?? s.email}</option>`)}</optgroup>`;
 }
-const forWho = (id, students) => (id ? t('trainer.for_one', { name: students.find((s) => s.id === id)?.full_name ?? '—' }) : t('trainer.for_all'));
+// Valeur du choix « Pour » → colonnes (élève seul, ou session payante)
+export const target = (value) => (value?.startsWith('cohort:') ? { student_id: null, cohort_id: value.slice(7) } : { student_id: value || null });
+export const forWho = (row, students, cohorts = COHORTS) => (row.cohort_id ? `⭐ ${cohorts.find((c) => c.id === row.cohort_id)?.title ?? t('pro.paid_formation')}`
+  : row.student_id ? t('trainer.for_one', { name: students.find((s) => s.id === row.student_id)?.full_name ?? '—' }) : t('trainer.for_all'));
 
 // Message d'erreur compréhensible (fichier refusé, trop lourd, base pas prête…)
 function errorText(err) {
@@ -40,7 +49,7 @@ async function sendFile(me, f) {
 }
 
 export async function solfegeTab(zone, me) {
-  const current = VIEWS.includes(view()) ? view() : 'formations';
+  const current = VIEWS.includes(view()) ? view() : 'agenda';
   zone.innerHTML = String(html`
     <div class="sol-chips" style="margin-bottom:14px">
       ${VIEWS.map((v) => html`<a class="sol-chip" href="#/formateur/solfege?vue=${v}" aria-pressed="${v === current}">${t('sol.' + v)}</a>`)}
@@ -48,7 +57,9 @@ export async function solfegeTab(zone, me) {
     <div id="sol-tr"><div class="spinner" role="status"></div></div>`);
   const inner = document.getElementById('sol-tr');
   try {
-    const students = await getStudentList();
+    const [students, cohorts] = await Promise.all([getStudentList(), getSolfegeCohorts().catch(() => [])]);
+    COHORTS = cohorts.filter((c) => c.trainer_id === me.id);
+    if (PRO_VIEWS[current]) await PRO_VIEWS[current](inner, me, students, COHORTS);
     if (current === 'formations') await coursesView(inner, me, students);
     if (current === 'lives') await livesView(inner, me, students);
     if (current === 'ressources') await resourcesView(inner, me, students);
@@ -78,7 +89,7 @@ async function coursesView(zone, me, students) {
         <h2 style="font-size:1.15rem">${t('sol.my_courses')} <span class="badge-pill">${courses.length}</span></h2>
         ${courses.length ? html`<ul class="res-list">${courses.map((c) => html`<li class="res-item">
           <div class="res-head"><span class="sol-ico" aria-hidden="true">🎓</span>
-            <div style="flex:1;min-width:0"><strong>${c.title}</strong><div class="muted small">${t('sol.n_lessons', { n: c.lessons.length })} · ${forWho(c.student_id, students)}</div></div>
+            <div style="flex:1;min-width:0"><strong>${c.title}</strong><div class="muted small">${t('sol.n_lessons', { n: c.lessons.length })} · ${forWho(c, students)}</div></div>
             <button class="btn btn-ghost btn-sm" type="button" data-del-course="${c.id}" aria-label="${t('trainer.delete')} ${c.title}">🗑</button></div>
           <div class="res-actions"><a class="btn btn-sm" href="#/formateur/solfege/${c.id}">${t('sol.manage_lessons')}</a></div>
         </li>`)}</ul>` : html`<p class="muted" style="margin:0">${t('sol.no_courses_trainer')}</p>`}
@@ -93,7 +104,7 @@ async function coursesView(zone, me, students) {
     const btn = form.querySelector('button[type=submit]');
     setBusy(btn, true);
     try {
-      const c = await createSolfegeCourse({ trainer_id: me.id, title, description: form.elements.description.value.trim(), student_id: form.elements.to.value || null, position: courses.length });
+      const c = await createSolfegeCourse({ trainer_id: me.id, title, description: form.elements.description.value.trim(), ...target(form.elements.to.value), position: courses.length });
       toast(t('sol.course_created'), 'success');
       navigate(`/formateur/solfege/${c.id}`);
     } catch (err) { console.error(err); setBusy(btn, false); setFormMessage(form, errorText(err)); }
@@ -133,7 +144,7 @@ export async function trainerSolfegeCoursePage({ id }, me) {
       <div>
         <a href="#/formateur/solfege?vue=formations" class="small">← ${t('sol.my_courses')}</a>
         <h1 style="margin:10px 0 4px">${course.title}</h1>
-        <p class="muted" style="margin:0">${forWho(course.student_id, students)} · ${t('sol.n_lessons', { n: lessons.length })}</p>
+        <p class="muted" style="margin:0">${forWho(course, students)} · ${t('sol.n_lessons', { n: lessons.length })}</p>
       </div>
       <section class="card">
         <h2 style="font-size:1.15rem">${t('sol.lessons')}</h2>
@@ -241,7 +252,7 @@ export async function trainerSolfegeCoursePage({ id }, me) {
 }
 
 // ---------------- Lives ----------------
-function jitsiLink(title) {
+export function jitsiLink(title) {
   const slug = title.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9]+/g, '').slice(0, 30);
   const random = crypto.getRandomValues(new Uint32Array(2)).reduce((s, n) => s + n.toString(36), '');
   return `https://meet.jit.si/MusicProgressionLab-${slug}-${random}`;
@@ -252,13 +263,13 @@ function todayInput() {
 }
 
 async function livesView(zone, me, students) {
-  const lives = (await getSolfegeLives()).filter((l) => l.trainer_id === me.id);
+  const lives = (await getSolfegeLives()).filter((l) => l.trainer_id === me.id && !l.coaching_id);
   const next = lives.filter((l) => liveState(l) !== 'past');
   const past = lives.filter((l) => liveState(l) === 'past').reverse();
   const item = (l) => html`<li class="res-item">
     <div class="res-head"><span class="sol-ico" aria-hidden="true">🎥</span>
       <div style="flex:1;min-width:0"><strong>${l.title}</strong>
-        <div class="muted small">${fmtWhen(l.starts_at)} · ${t('sol.minutes', { n: l.duration_minutes })} · ${forWho(l.student_id, students)}</div></div>
+        <div class="muted small">${fmtWhen(l.starts_at)} · ${t('sol.minutes', { n: l.duration_minutes })} · ${forWho(l, students)}</div></div>
       <button class="btn btn-ghost btn-sm" type="button" data-del-live="${l.id}" aria-label="${t('trainer.delete')} ${l.title}">🗑</button></div>
     <div class="res-actions">
       ${liveState(l) === 'past'
@@ -316,7 +327,7 @@ async function livesView(zone, me, students) {
     try {
       await createSolfegeLive({
         trainer_id: me.id, title, description: form.elements.description.value.trim(), starts_at: start.toISOString(),
-        duration_minutes: Number(form.elements.duration.value), meeting_url: own ? url : jitsiLink(title), student_id: form.elements.to.value || null
+        duration_minutes: Number(form.elements.duration.value), meeting_url: own ? url : jitsiLink(title), ...target(form.elements.to.value)
       });
       toast(t('sol.live_created'), 'success');
       reload('lives');
@@ -378,7 +389,7 @@ async function resourcesView(zone, me, students) {
       </section>
       <section class="card">
         <h2 style="font-size:1.15rem">${t('trainer.my_resources')} <span class="badge-pill">${resources.length}</span></h2>
-        ${resources.length ? html`<ul class="res-list" id="sol-my-res">${resources.map((r) => resourceCard(r, { deletable: true, meta: `${forWho(r.student_id, students)} · ${fmtDay(r.created_at)}` }))}</ul>`
+        ${resources.length ? html`<ul class="res-list" id="sol-my-res">${resources.map((r) => resourceCard(r, { deletable: true, meta: `${forWho(r, students)} · ${fmtDay(r.created_at)}` }))}</ul>`
           : html`<p class="muted" style="margin:0">${t('trainer.no_resources')}</p>`}
       </section>
     </div>`);
@@ -397,7 +408,7 @@ async function resourcesView(zone, me, students) {
     const kind = form.elements.kind.value;
     const title = form.elements.title.value.trim();
     if (!title) return setFormMessage(form, t('trainer.need_title'));
-    const row = { trainer_id: me.id, title, description: form.elements.description.value.trim(), student_id: form.elements.to.value || null };
+    const row = { trainer_id: me.id, title, description: form.elements.description.value.trim(), ...target(form.elements.to.value) };
     const btn = form.querySelector('button[type=submit]');
     try {
       if (kind === 'file') {
