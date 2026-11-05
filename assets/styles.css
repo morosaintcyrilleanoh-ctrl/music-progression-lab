@@ -590,3 +590,60 @@ fieldset.field legend { font-weight: 700; margin-bottom: 4px; }
 .sol-chip-radio span { display: inline-flex; align-items: center; min-height: 40px; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); font-weight: 700; font-size: 0.9rem; cursor: pointer; }
 .sol-chip-radio input:checked + span { background: var(--blue-strong); border-color: var(--blue-strong); color: #fff; }
 .sol-chip-radio input:focus-visible + span { box-shadow: var(--focus); }
+
+/* =====================================================================
+   OREILLE MUSICALE : nouvelles activités, défi, examens, programmes
+   ===================================================================== */
+@font-face { font-family: Bravura; src: url('../solfege/fonts/bravura.woff2') format('woff2'); font-display: block; }
+.ear-tiles { gap: 12px; }
+.ear-tile { display: flex; gap: 12px; align-items: flex-start; color: var(--text); text-decoration: none; min-height: 44px; }
+.ear-tile:hover { border-color: var(--blue-100); }
+.ear-tile > span:last-child { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.ear-tile-ico { display: grid; place-items: center; width: 44px; height: 44px; flex-shrink: 0; border-radius: 12px; background: var(--blue-50); font-size: 1.35rem; }
+.ear-tile-meta { color: var(--blue-strong); font-weight: 700; margin-top: 2px; }
+.ear-head { display: flex; gap: 8px; align-items: flex-start; }
+.ear-level-msg { margin: 10px 0 0; padding: 8px 12px; border-radius: 10px; background: #fef3c7; color: #92400e; font-weight: 700; }
+.ear-levels { display: grid; gap: 8px; margin-bottom: 10px; }
+.ear-level { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); font: inherit; text-align: left; cursor: pointer; min-height: 48px; color: var(--text); }
+.ear-level.is-picked { border-color: var(--blue-strong); box-shadow: 0 0 0 2px var(--blue-100); }
+.ear-level:disabled { opacity: .55; cursor: not-allowed; }
+/* Clavier */
+.ear-keys { position: relative; display: flex; height: 150px; margin: 6px 0 0; user-select: none; touch-action: manipulation; }
+.ear-key { font: inherit; cursor: pointer; padding: 0; }
+.ear-key.white { flex: 1; border: 1px solid #c7d4ea; border-radius: 0 0 8px 8px; background: linear-gradient(#fff, #f3f6fb); display: flex; align-items: flex-end; justify-content: center; padding-bottom: 8px; color: var(--muted); font-size: .72rem; font-weight: 700; }
+.ear-key.black { position: absolute; top: 0; height: 60%; border: 0; border-radius: 0 0 6px 6px; background: linear-gradient(#1f2a44, #0b1220); z-index: 2; }
+.ear-key.white:active, .ear-key.white.is-hit { background: var(--blue-100); }
+.ear-key.black:active { background: var(--blue-strong); }
+.ear-slots { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-bottom: 4px; }
+.ear-slot { min-width: 48px; padding: 8px 6px; border-radius: 10px; border: 2px dashed var(--border-strong); text-align: center; font-weight: 800; display: flex; flex-direction: column; }
+.ear-slot.is-filled { border-style: solid; border-color: var(--blue-100); background: var(--blue-50); }
+.ear-slot.is-given { border-color: var(--blue-strong); }
+.ear-slot.is-ok { border: 2px solid #86efac; background: #f0fdf4; color: var(--success); }
+.ear-slot.is-ko { border: 2px solid #fecaca; background: #fef2f2; color: var(--danger); }
+.ear-slot small { font-size: .7rem; font-weight: 700; color: var(--success); }
+/* Portée et rythmes */
+.ear-staff-wrap { overflow-x: auto; }
+.ear-staff { width: 100%; max-width: 420px; height: auto; display: block; margin: 0 auto; }
+.ear-rhythm { height: 54px; width: auto; max-width: 100%; display: block; }
+.choice .ear-rhythm { flex: 1; }
+.ear-opt { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 8px; background: var(--blue-50); color: var(--blue-strong); font-weight: 800; margin-right: 8px; flex-shrink: 0; }
+/* Chanter une gamme */
+.ear-degrees { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 10px 0; }
+.ear-degree { min-width: 46px; padding: 8px 6px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); text-align: center; font-weight: 800; display: flex; flex-direction: column; }
+.ear-degree small { font-size: .68rem; font-weight: 700; }
+.ear-degree.is-current { border-color: var(--blue-strong); box-shadow: 0 0 0 2px var(--blue-100); }
+.ear-degree.is-ok { background: #f0fdf4; border-color: #86efac; color: var(--success); }
+.ear-degree.is-ko { background: #fef2f2; border-color: #fecaca; color: var(--danger); }
+/* Rythme : frapper */
+.ear-tempo { text-align: center; font-size: 1.6rem; font-weight: 800; color: var(--blue-strong); min-height: 2rem; }
+/* Classement, programmes */
+.ear-board { list-style: none; margin: 0; padding: 0; }
+.ear-board li { display: flex; gap: 10px; align-items: center; padding: 10px 6px; border-top: 1px solid var(--border); }
+.ear-board li:first-child { border-top: 0; }
+.ear-board li.is-me { background: var(--blue-50); border-radius: 10px; font-weight: 700; }
+.ear-rank { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 999px; background: var(--bg-2); font-weight: 800; font-size: .85rem; }
+.ear-board li:nth-child(1) .ear-rank { background: #fef3c7; color: #92400e; }
+.ear-days { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.ear-days li { display: flex; align-items: center; gap: 10px; padding: 8px 4px; border-top: 1px solid var(--border); min-height: 44px; }
+.ear-days li:first-child { border-top: 0; }
+.ear-days a { display: flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; flex: 1; }

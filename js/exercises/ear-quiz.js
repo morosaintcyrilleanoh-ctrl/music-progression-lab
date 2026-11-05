@@ -66,7 +66,7 @@ function chordName(tonic, degree) {
 }
 
 // ---------- Fabrique une question (son + réponses possibles) ----------
-function makeQuestion(mode, cfg, prev) {
+export function makeQuestion(mode, cfg, prev) {
   let answer = pick(cfg.choices);
   if (answer === prev && cfg.choices.length > 2) answer = pick(cfg.choices); // évite trop de répétitions
   const T = t('ear');

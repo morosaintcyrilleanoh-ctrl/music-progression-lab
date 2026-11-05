@@ -544,3 +544,26 @@ export async function gradeSubmission(id, grade, feedback) {
   return check(await supabase.from('solfege_submissions')
     .update({ grade: grade || null, feedback: feedback || null, corrected_at: new Date().toISOString() }).eq('id', id).select().single());
 }
+
+// ---------------------------------------------------------------------
+// Oreille+ : résultats des nouvelles activités, programmes, classement
+// ---------------------------------------------------------------------
+export async function saveEarResult(row) {
+  return check(await supabase.from('ear_results').insert(row).select().single());
+}
+export async function getEarResults(userId, { kind, since } = {}) {
+  let q = supabase.from('ear_results').select('*').eq('user_id', userId);
+  if (kind) q = q.eq('kind', kind);
+  if (since) q = q.gte('day', since);
+  return check(await q.order('created_at', { ascending: false }).limit(500));
+}
+export async function getProgramProgress(userId) {
+  return check(await supabase.from('ear_program_progress').select('program, day, done_at').eq('user_id', userId));
+}
+export async function markProgramDay(program, day) {
+  const { error } = await supabase.from('ear_program_progress').insert({ program, day });
+  if (error && error.code !== '23505') throw error; // déjà fait : rien à faire
+}
+export async function getEarLeaderboard(days = 7) {
+  return check(await supabase.rpc('ear_leaderboard', { p_days: days })) ?? [];
+}

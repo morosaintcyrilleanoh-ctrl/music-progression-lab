@@ -53,7 +53,7 @@ const playItem = (item) => (item.notes.length === 1
 // ---------------------------------------------------------------------
 // Choix du mode (une fois par visite)
 // ---------------------------------------------------------------------
-async function chooseMode(stage) {
+export async function chooseMode(stage) {
   if (getSingMode() === 'self') return 'self';
   if (getSingMode() === 'mic') {
     // Le micro a été coupé à la fin de la séance précédente : on le relance
@@ -95,7 +95,7 @@ async function chooseMode(stage) {
 // ---------------------------------------------------------------------
 // Chanter UNE note avec le micro : jauge en direct
 // ---------------------------------------------------------------------
-async function singWithMic(zone, target, { tolerance, holdMs, timeoutMs = 10000 }) {
+export async function singWithMic(zone, target, { tolerance, holdMs, timeoutMs = 10000 }) {
   set(zone, html`
     <div class="tuner" role="group" aria-label="${t('ex.mic.tuner')}">
       <div class="tuner-target">${t('ex.mic.target')} : <strong>${noteName(target)}</strong></div>
@@ -161,7 +161,7 @@ async function singWithMic(zone, target, { tolerance, holdMs, timeoutMs = 10000 
   return { ok: stopReason === 'success', cents: median, voicedFrames: voiced.length, reason: stopReason, octave: octaveSeen };
 }
 
-function micFeedbackText(r, target) {
+export function micFeedbackText(r, target) {
   if (r.ok) return t('ex.mic.fb_ok', { note: noteName(target) });
   if (r.cents === null || r.voicedFrames < 5) return t('ex.mic.fb_silence');
   const c = Math.round(Math.abs(r.cents));

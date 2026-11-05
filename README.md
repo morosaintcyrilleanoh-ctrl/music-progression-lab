@@ -31,6 +31,31 @@ Base de données et comptes : **Supabase**. Hébergement : **Vercel**.
 - Ne jamais y mettre la clé `service_role` / `secret`.
 - La protection des données est assurée par les règles de la base (Row Level Security).
 
+## Oreille musicale (#/oreille)
+
+L'onglet **Oreille** regroupe :
+
+- **Activités** : dictée mélodique (clavier à l'écran), dictée rythmique (écritures
+  dessinées), cadences (parfaite, demi, plagale, rompue), reconnaissance des
+  instruments, chanter un intervalle, chanter une gamme (justesse de chaque degré),
+  solfège chanté (portée), tempo qui accélère, polyrythmie 2 contre 3. Chaque activité
+  a des niveaux (le suivant s'ouvre à 80 %) et une **difficulté qui s'adapte**
+  (3 bonnes réponses de suite → plus dur ; 2 erreurs → plus facile), aussi proposée
+  pour les exercices d'écoute existants (intervalles, accords, gammes, degrés, suites).
+- **Défi du jour** : 5 questions, mêmes thèmes pour tous ce jour-là, série de jours et
+  classement de la semaine entre élèves d'un même formateur (prénom et points).
+- **Examens** chronométrés (70 % pour réussir) et **certificat PDF** à son nom
+  (généré dans le navigateur avec jsPDF), avec code de vérification.
+- **Programmes de 30 jours** : oreille, rythme, chanteurs, accompagnateurs.
+- **Accordeur** (micro) et **diapason** (La 440, notes de référence, cordes de guitare).
+- Le formateur voit tout cela sur la fiche de l'élève.
+
+**Son de piano** : vrai piano enregistré, `assets/piano/` (Salamander Grand Piano V3,
+Alexander Holm, licence CC BY 3.0, voir `assets/piano/CREDITS.txt`) ; les autres
+instruments sont des imitations synthétisées.
+
+**Activation (une fois)** : `supabase/migrations/20261105120000_oreille_plus.sql`.
+
 ## Formation payante, agenda, coaching, devoirs (volet Solfège)
 
 Seuls la **formation** (sessions de 3 mois, 30 places) et le **coaching** sont payants ;

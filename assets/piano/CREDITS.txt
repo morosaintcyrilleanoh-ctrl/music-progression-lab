@@ -1,0 +1,5 @@
+Sons de piano : Salamander Grand Piano V3 (Yamaha C5)
+Auteur : Alexander Holm — licence Creative Commons Attribution 3.0 (CC BY 3.0)
+https://creativecommons.org/licenses/by/3.0/
+Fichiers d'origine : https://github.com/Tonejs/audio/tree/master/salamander
+Modifications : notes raccourcies à 4 secondes (fondu de sortie), converties en mono 96 kbit/s.
