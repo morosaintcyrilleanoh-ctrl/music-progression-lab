@@ -4,6 +4,7 @@ import { t } from '../i18n.js';
 import { getUser } from '../auth.js';
 import { pickSkills } from './personal.js';
 import { renderSolfege } from './solfege-summary.js';
+import { renderEarPlus } from './ear-summary.js';
 import {
   getLastDiagnostic, getSkillScores, getVisibleAssignments, getMyAssignmentProgress, getMyRecommendations,
   getProfile, getStarterProgram, getUserProgram, getSkillsWithScores,
@@ -115,6 +116,7 @@ export async function dashboardPage() {
       </section>
 
       <section class="card" id="solfege-zone" aria-label="${t('solfege.title')}"><div class="spinner" role="status"></div></section>
+      <section class="card" id="ear-zone" aria-label="${t('earp.title')}"><div class="spinner" role="status"></div></section>
 
       <div><a class="btn btn-ghost" href="#/programme">${t('dashboard.see_program')}</a></div>
     </div>
@@ -135,6 +137,7 @@ export async function dashboardPage() {
 
   loadExtras(user, profile);
   renderSolfege(document.getElementById('solfege-zone'), user.id, { own: true });
+  renderEarPlus(document.getElementById('ear-zone'), user.id, { own: true });
 }
 
 // Cartes complémentaires : diagnostic, entraînement personnalisé, devoirs, messages, espace formateur

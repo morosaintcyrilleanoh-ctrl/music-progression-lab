@@ -16,6 +16,7 @@ import { diagnosticPage, diagnosticResultPage, trainingPage } from './pages/pers
 import { coursePage, assignmentPage } from './pages/course.js';
 import { trainerPage, trainerStudentPage, trainerSolfegeCourse, trainerSolfegeSession, trainerSolfegeCoaching, trainerSolfegeHomework } from './pages/trainer.js';
 import { solfegeSpacePage, solfegeCoursePage } from './pages/solfege-space.js';
+import { earHubPage, earActivityPage, earChallengePage, earExamsPage, earExamPage, earProgramPage, earProgramDayPage, earTunerPage } from './pages/ear-hub.js';
 import { libraryPage } from './pages/library.js';
 import { getProfile, getMyTrainers, joinTrainer } from './data.js';
 import { syncSolfege } from './solfege-sync.js';
@@ -45,6 +46,14 @@ route('/formateur/solfege/:id', trainerSolfegeCourse, { auth: true });
 route('/formateur/solfege/session/:id', trainerSolfegeSession, { auth: true });
 route('/formateur/solfege/coaching/:id', trainerSolfegeCoaching, { auth: true });
 route('/formateur/solfege/devoir/:id', trainerSolfegeHomework, { auth: true });
+route('/oreille', earHubPage, { auth: true });
+route('/oreille/activite/:id', earActivityPage, { auth: true });
+route('/oreille/defi', earChallengePage, { auth: true });
+route('/oreille/examens', earExamsPage, { auth: true });
+route('/oreille/examen/:id', earExamPage, { auth: true });
+route('/oreille/programme/:slug', earProgramPage, { auth: true });
+route('/oreille/programme/:slug/:day', earProgramDayPage, { auth: true });
+route('/oreille/accordeur', earTunerPage, { auth: true });
 route('/espace-solfege', solfegeSpacePage, { auth: true });
 route('/espace-solfege/formation/:id', solfegeCoursePage, { auth: true });
 route('/espace-solfege/formation/:id/:lesson', solfegeCoursePage, { auth: true });
@@ -99,7 +108,7 @@ function link(href, label) {
 }
 
 // ---------- Barre du bas (téléphone) : Accueil · Oreille · Solfège · Compte ----------
-const EAR_PATHS = ['/programme', '/bibliotheque', '/seance', '/diagnostic', '/entrainement'];
+const EAR_PATHS = ['/oreille', '/programme', '/bibliotheque', '/seance', '/diagnostic', '/entrainement'];
 const ACCOUNT_PATHS = ['/tableau-de-bord', '/statistiques', '/cours', '/devoir', '/formateur', '/connexion', '/inscription', '/mot-de-passe-oublie', '/nouveau-mot-de-passe'];
 function tabFor(path) {
   if (path.startsWith('/espace-solfege')) return 'solfege';
@@ -116,7 +125,7 @@ function renderTabbar() {
     html`<a href="${href}" ${active === key ? raw('aria-current="page"') : ''}>${raw(icon)}<span>${label}</span></a>`;
   bar.innerHTML = String(html`
     ${item('home', '#/', icons.home, t('nav.home'))}
-    ${item('ear', user ? '#/bibliotheque' : '#/programme', icons.ear, t('nav.ear'))}
+    ${item('ear', user ? '#/oreille' : '#/programme', icons.ear, t('nav.ear'))}
     ${item('solfege', user ? '/solfege/' : '#/connexion?retour=solfege', icons.staff, t('nav.solfege'))}
     ${item('account', user ? '#/tableau-de-bord' : '#/connexion', icons.user, t('nav.account'))}`);
 }
@@ -139,6 +148,7 @@ function renderNav() {
       ${link('#/tableau-de-bord', t('nav.dashboard'))}
       ${link('#/programme', t('nav.program'))}
       ${link('/solfege/', t('nav.solfege'))}
+      ${link('#/oreille', t('nav.ear'))}
       ${link('#/bibliotheque', t('nav.library'))}
       ${link('#/statistiques', t('nav.stats'))}
       ${link('#/cours', t('nav.course'))}

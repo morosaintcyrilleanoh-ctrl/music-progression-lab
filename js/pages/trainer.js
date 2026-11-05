@@ -9,6 +9,7 @@ import { renderStats } from './stats.js';
 import { resourceItem, bindResourceActions } from './course.js';
 import { levelLabel } from './personal.js';
 import { renderSolfege } from './solfege-summary.js';
+import { renderEarPlus } from './ear-summary.js';
 import { solfegeTab, trainerSolfegeCoursePage } from './trainer-solfege.js';
 import { trainerCohortPage, trainerCoachingPage, trainerHomeworkPage } from './trainer-solfege-pro.js';
 import {
@@ -382,6 +383,7 @@ export async function trainerStudentPage({ id }) {
         <ul class="result-list">${Object.entries(diag.results ?? {}).filter(([k]) => !k.endsWith('_auto')).map(([k, v]) => html`<li><span>${t('stats.skill_names')[k] ?? k}</span><strong>${levelLabel(v)} <span class="muted small">(${v} %${diag.results[k + '_auto'] ? ' · ' + t('diag.auto') : ''})</span></strong></li>`)}</ul></section>` : ''}
       <div id="st-zone" class="dash-inner"><div class="spinner" role="status"></div></div>
       <section class="card" id="solfege-zone" aria-label="${t('solfege.title')}"><div class="spinner" role="status"></div></section>
+      <section class="card" id="ear-zone" aria-label="${t('earp.title')}"><div class="spinner" role="status"></div></section>
       <div class="grid grid-2">
         <section class="card">
           <h2 style="font-size:1.15rem">${t('trainer.send_msg')}</h2>
@@ -409,6 +411,7 @@ export async function trainerStudentPage({ id }) {
 
   renderStats(document.getElementById('st-zone'), id, { trainerView: true });
   renderSolfege(document.getElementById('solfege-zone'), id);
+  renderEarPlus(document.getElementById('ear-zone'), id);
 
   document.getElementById('msg-form').addEventListener('submit', async (e) => {
     e.preventDefault();

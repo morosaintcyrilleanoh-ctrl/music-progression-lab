@@ -1,6 +1,8 @@
 // =====================================================================
-// Moteur audio : produit les sons directement dans le navigateur
-// (aucun fichier à télécharger). Utilise la Web Audio API.
+// Moteur audio (Web Audio API). Les notes sont jouées par un vrai piano
+// enregistré (assets/piano, Salamander Grand Piano, CC BY 3.0) ; tant que
+// les sons ne sont pas chargés (ou sans connexion), un son synthétisé prend
+// le relais. Les autres sons (clics, batterie…) sont produits directement.
 // =====================================================================
 import { midiToFreq } from './music.js';
 
@@ -21,18 +23,67 @@ export function unlockAudio() {
     master.connect(comp).connect(ctx.destination);
   }
   if (ctx.state === 'suspended') ctx.resume();
+  preloadPiano();
   return ctx;
 }
+
+// ---------- Piano enregistré : une note tous les 3 demi-tons, de Do2 à Do7 ----------
+const SAMPLE_NAMES = ['C', 'Ds', 'Fs', 'A'];
+const SAMPLES = [];
+for (let octave = 2; octave <= 6; octave++) {
+  SAMPLE_NAMES.forEach((n, i) => SAMPLES.push({ midi: 12 * (octave + 1) + i * 3, file: `${n}${octave}` }));
+}
+SAMPLES.push({ midi: 96, file: 'C7' });
+const buffers = new Map();
+let loading = null;
+
+/** Charge les sons du piano (une seule fois, en arrière-plan). */
+export function preloadPiano() {
+  if (loading || !ctx) return loading;
+  const base = new URL('../assets/piano/', import.meta.url);
+  loading = Promise.all(SAMPLES.map(async (s) => {
+    try {
+      const res = await fetch(new URL(`${s.file}.mp3`, base));
+      if (!res.ok) return;
+      const data = await res.arrayBuffer();
+      buffers.set(s.midi, await new Promise((ok, ko) => ctx.decodeAudioData(data, ok, ko)));
+    } catch { /* hors connexion : le son synthétisé reste utilisé */ }
+  }));
+  return loading;
+}
+export const pianoLoaded = () => buffers.size === SAMPLES.length;
+
+function samplePiano(midi, t, duration, volume) {
+  let best = null;
+  for (const s of SAMPLES) if (buffers.has(s.midi) && (!best || Math.abs(s.midi - midi) < Math.abs(best.midi - midi))) best = s;
+  if (!best || Math.abs(best.midi - midi) > 6) return false;
+  const src = ctx.createBufferSource();
+  src.buffer = buffers.get(best.midi);
+  src.playbackRate.value = Math.pow(2, (midi - best.midi) / 12);
+  const env = ctx.createGain();
+  const level = Math.min(1.5, volume * 2.2);
+  env.gain.setValueAtTime(level, t);
+  env.gain.setValueAtTime(level, t + duration);
+  env.gain.exponentialRampToValueAtTime(0.0001, t + duration + 0.35); // étouffoir
+  src.connect(env).connect(master);
+  src.start(t);
+  src.stop(t + duration + 0.4);
+  return true;
+}
+
+// Contexte et sortie (avec compresseur) pour les sons fabriqués ailleurs (instruments…)
+export function audioOut() { const ac = unlockAudio(); return ac ? { ac, out: master } : null; }
 
 export const audioSupported = () => !!(window.AudioContext || window.webkitAudioContext);
 export const now = () => (ctx ? ctx.currentTime : 0);
 export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-// ---------- Une note "type piano doux" ----------
+// ---------- Une note de piano (enregistré, sinon synthétisé) ----------
 export function playNote(midi, { duration = 0.9, when = 0, volume = 0.5 } = {}) {
   const ac = unlockAudio();
   if (!ac) return;
   const t = ac.currentTime + when;
+  if (samplePiano(midi, t, duration, volume)) return;
   const freq = midiToFreq(midi);
   const env = ac.createGain();
   env.gain.setValueAtTime(0.0001, t);
