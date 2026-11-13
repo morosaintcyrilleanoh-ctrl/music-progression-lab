@@ -194,7 +194,7 @@ async function singIntervals(stage, { level, voice, total = 6 }) {
     }
     if (ok) res.correct++;
     res.items.push({ q, ok, interval: semis });
-    await next(z('feedback'), q === total ? t('ex.finish') : t('ex.next'));
+    await next(z('feedback'), q === total ? t('ex.finish') : t('ex.next'), { onReplay: () => playMelody([base, target], 0.9) });
   }
   return res;
 }
@@ -243,7 +243,7 @@ async function singScale(stage, { level, voice }) {
     res.correct = ok ? res.total : 0;
     feedback(z('feedback'), { ok, title: ok ? T('sing_ok_scale') : T('sing_ko'), text: T('scale_was', { notes: notes.map(noteFr).join(' – ') }) });
   }
-  await next(z('feedback'), t('ex.finish'));
+  await next(z('feedback'), t('ex.finish'), { onReplay: () => playMelody(notes, 0.5) });
   return res;
 }
 
@@ -282,7 +282,7 @@ async function sightSing(stage, { level, total = 4 }) {
       feedback(z('feedback'), { ok, title: ok ? T('sing_ok_scale') : T('sing_ko'), text: T('melody_was', { notes: notes.map(noteFr).join(' – ') }) });
     }
     res.items.push({ q, notes: notes.map(noteFr).join(' '), ok: done.every(Boolean) });
-    await next(z('feedback'), q === total ? t('ex.finish') : t('ex.next'));
+    await next(z('feedback'), q === total ? t('ex.finish') : t('ex.next'), { onReplay: () => playMelody(notes) });
   }
   if (!res.total) res.total = 1;
   return res;

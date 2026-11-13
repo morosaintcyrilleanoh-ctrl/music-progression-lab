@@ -647,3 +647,4 @@ fieldset.field legend { font-weight: 700; margin-bottom: 4px; }
 .ear-days li { display: flex; align-items: center; gap: 10px; padding: 8px 4px; border-top: 1px solid var(--border); min-height: 44px; }
 .ear-days li:first-child { border-top: 0; }
 .ear-days a { display: flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; flex: 1; }
+.next-row { display: grid; gap: 10px; margin-top: 12px; }

@@ -245,7 +245,7 @@ export default {
           expected: { notes: item.notes.map(noteName), mode: 'auto_evaluation' }, answer: { auto_evaluation: value }
         });
       }
-      await next(z('feedback'), i === items.length - 1 ? t('ex.finish') : t('ex.next'));
+      await next(z('feedback'), i === items.length - 1 ? t('ex.finish') : t('ex.next'), { onReplay: () => playItem(item) });
     }
     return res;
   }

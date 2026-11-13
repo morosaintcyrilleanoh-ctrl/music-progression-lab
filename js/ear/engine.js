@@ -91,7 +91,7 @@ export async function runQuiz(stage, { makeQuestion, total, level = 1, maxLevel 
         res.bestLevel = Math.max(res.bestLevel, res.level);
         if (msg) z('feedback').insertAdjacentHTML('beforeend', String(html`<p class="ear-level-msg">${msg}</p>`));
       }
-      await next(z('feedback'), q === total ? t('ex.finish') : t('ex.next'));
+      await next(z('feedback'), q === total ? t('ex.finish') : t('ex.next'), { onReplay: Q.play });
     }
   } finally {
     clearInterval(timer);

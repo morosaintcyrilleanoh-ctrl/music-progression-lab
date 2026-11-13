@@ -58,7 +58,7 @@ export default {
         expected: { reponse: kind, note1: noteName(first), note2: noteName(second), ecart_demi_tons: kind === 'identique' ? 0 : usedGap },
         answer: { reponse: value }
       });
-      await next(z('feedback'), q === total ? t('ex.finish') : t('ex.next'));
+      await next(z('feedback'), q === total ? t('ex.finish') : t('ex.next'), { onReplay: play });
     }
     return res;
   }

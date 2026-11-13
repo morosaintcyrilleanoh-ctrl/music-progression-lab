@@ -65,16 +65,34 @@ export function feedback(zone, { ok, title, text, tip }) {
     </div>`);
 }
 
-// Bouton "Suivant" (ou Entrée)
-export async function next(zone, label = t('ex.next')) {
+// Bouton "Suivant" (ou Entrée). Avec onReplay : un bouton « Réécouter l'exercice »
+// (touche R) permet de réentendre la question après la correction.
+export async function next(zone, label = t('ex.next'), { onReplay } = {}) {
+  const row = document.createElement('div');
+  row.className = 'next-row';
+  if (onReplay) {
+    const again = document.createElement('button');
+    again.type = 'button';
+    again.className = 'btn btn-ghost btn-block';
+    again.dataset.action = 'replay';
+    again.textContent = `↻ ${t('ex.replay_question')}`;
+    row.appendChild(again);
+  }
   const btn = document.createElement('button');
   btn.type = 'button';
   btn.className = 'btn btn-lg btn-block';
   btn.dataset.action = 'next';
   btn.textContent = label;
-  zone.appendChild(btn);
+  row.appendChild(btn);
+  zone.appendChild(row);
   btn.focus({ preventScroll: true });
-  await waitAction(zone, ['next'], { Enter: 'next' });
+  for (;;) {
+    const action = await waitAction(zone, ['next', 'replay'], onReplay ? { Enter: 'next', r: 'replay', R: 'replay' } : { Enter: 'next' });
+    if (action === 'next') return;
+    const again = row.querySelector('[data-action="replay"]');
+    again.disabled = true;
+    try { await onReplay(); } finally { again.disabled = false; }
+  }
 }
 
 // Barre de progression interne à un exercice

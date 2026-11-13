@@ -145,7 +145,7 @@ export const rhythmEcho = {
         expected: { motif: syllables(pattern), coups: pattern.length },
         answer: { coups: user.length, positions: user.map((x) => Math.round(x * 100) / 100) }
       });
-      await next(z('feedback'), q === total ? t('ex.finish') : t('ex.next'));
+      await next(z('feedback'), q === total ? t('ex.finish') : t('ex.next'), { onReplay: play });
     }
     return res;
   }
