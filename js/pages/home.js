@@ -41,6 +41,14 @@ export async function homePage() {
             <div><h3>${t('home.f_solfege_title')} <span class="badge-new">${t('home.solfege_eyebrow')}</span></h3><p class="muted small">${t('home.solfege_text')}</p>
             <span class="feature-more">${t('home.solfege_cta')} →</span></div>
           </a>
+          <a class="card feature" href="${user ? '#/harmonie' : '#/connexion'}">
+            <span class="feature-ico" aria-hidden="true" style="font-size:1.5rem">🎼</span>
+            <div><h3>${t('home.f_harmony_title')} <span class="badge-new">${t('home.solfege_eyebrow')}</span></h3><p class="muted small">${t('home.f_harmony_text')}</p></div>
+          </a>
+          <a class="card feature" href="${user ? '#/accords' : '#/connexion'}">
+            <span class="feature-ico">${raw(icons.chords)}</span>
+            <div><h3>${t('home.f_chords_title')} <span class="badge-new">${t('home.solfege_eyebrow')}</span></h3><p class="muted small">${t('home.f_chords_text')}</p></div>
+          </a>
           <a class="card feature" href="#/statistiques">
             <span class="feature-ico">${raw(icons.chart)}</span>
             <div><h3>${t('home.f_stats_title')}</h3><p class="muted small">${t('home.f_stats_text')}</p></div>

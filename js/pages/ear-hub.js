@@ -27,12 +27,12 @@ const titleOf = (a) => T('act')[a.id]?.title ?? t('ear.modes')[a.earMode]?.title
 const leadOf = (a) => T('act')[a.id]?.lead ?? t('ear.modes')[a.earMode]?.lead ?? '';
 
 // Résultats de l'élève (vide si la base n'est pas encore prête)
-async function myResults(userId) {
+export async function myResults(userId) {
   try { return { rows: await getEarResults(userId), ready: true }; }
   catch (err) { if (!isMissing(err)) console.error(err); return { rows: [], ready: !isMissing(err) }; }
 }
 // Niveau débloqué : le niveau suivant s'ouvre à 80 % de réussite
-function unlockedLevel(a, rows, staff) {
+export function unlockedLevel(a, rows, staff) {
   if (staff) return a.levels;
   let best = 0;
   for (const r of rows) if (r.activity === a.id && r.level && r.correct / r.total >= 0.8) best = Math.max(best, r.level);
@@ -47,12 +47,12 @@ async function runActivity(stage, a, opts) {
 }
 
 // Enregistre un résultat ; ne prétend jamais avoir réussi si la base refuse
-async function save(row) {
+export async function save(row) {
   const r = { ...row, day: localDay(), total: Math.max(1, row.total), correct: Math.min(row.correct, Math.max(1, row.total)) };
   try { return { saved: await saveEarResult(r) }; }
   catch (err) { if (!isMissing(err)) console.error(err); return { error: isMissing(err) ? T('not_ready') : t('errors.generic') }; }
 }
-const savedNote = (s) => (s.saved ? html`<p class="small" style="color:var(--success);margin:8px 0 0">✓ ${T('saved')}</p>` : html`<p class="alert alert-info small" style="margin:8px 0 0">${T('not_saved')} ${s.error}</p>`);
+export const savedNote = (s) => (s.saved ? html`<p class="small" style="color:var(--success);margin:8px 0 0">✓ ${T('saved')}</p>` : html`<p class="alert alert-info small" style="margin:8px 0 0">${T('not_saved')} ${s.error}</p>`);
 
 // Série de jours consécutifs avec un défi
 function streakOf(rows) {
