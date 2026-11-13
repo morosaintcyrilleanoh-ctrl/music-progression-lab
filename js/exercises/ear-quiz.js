@@ -242,7 +242,7 @@ export default {
         expected: { exercice: mode, niveau: level, reponse: String(Q.answer), ...Q.detail },
         answer: { reponse: value }
       });
-      await next(z('feedback'), q === total ? t('ex.finish') : t('ex.next'));
+      await next(z('feedback'), q === total ? t('ex.finish') : t('ex.next'), { onReplay: Q.replay ?? (() => Q.sound(Q.answer)) });
     }
 
     // 80 % ou plus : le niveau suivant se débloque

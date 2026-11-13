@@ -162,6 +162,7 @@ export default {
   ex: {
     choose: 'Choisis ta réponse',
     replay: 'Réécouter',
+    replay_question: 'Réécouter l’exercice',
     listening: 'Écoute bien…',
     correct: 'Bonne réponse !',
     next: 'Suivant',

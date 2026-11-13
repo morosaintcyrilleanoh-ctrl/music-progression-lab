@@ -56,7 +56,7 @@ export default {
         error_type: ok ? null : `dessin_${value}_au_lieu_de_${shape}`,
         expected: { dessin: shape, notes: notes.map(noteName) }, answer: { dessin: value }
       });
-      await next(z('feedback'), q === total ? t('ex.finish') : t('ex.next'));
+      await next(z('feedback'), q === total ? t('ex.finish') : t('ex.next'), { onReplay: play });
     }
     return res;
   }

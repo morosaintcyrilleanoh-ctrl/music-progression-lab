@@ -1,7 +1,7 @@
 // Exercice : "Les 3 écoutes" — un petit extrait généré, puis des questions
 import { html } from '../ui.js';
 import { t } from '../i18n.js';
-import { playKick, playHat, playBass, playPad, playNote, sleep } from '../audio.js';
+import { playKick, playHat, playSynthBass, playPad, playNote, sleep } from '../audio.js';
 import { askChoice, feedback, next, set, waitAction } from './common.js';
 
 function makeExcerpt() {
@@ -17,7 +17,7 @@ function makeExcerpt() {
       const w = 0.2 + b * beat;
       if (b % 2 === 0) playKick(w);
       playHat(w); playHat(w + beat / 2);
-      playBass(bassSteps[b], { when: w, duration: beat * 0.9 });
+      playSynthBass(bassSteps[b], { when: w, duration: beat * 0.9 });
       if (withMelody) playNote(melody[b], { when: w, duration: beat * 0.8, volume: 0.25 });
     }
     if (withPad) { playPad([60, 64, 67], { when: 0.2, duration: beat * 4 }); playPad([57, 60, 64], { when: 0.2 + beat * 4, duration: beat * 4 }); }
@@ -68,7 +68,7 @@ export default {
       res.total++; res.done++; if (ok) res.correct++; res.scoreSum += ok ? 1 : 0;
       ctx.record({ is_correct: ok, score: ok ? 1 : 0, response_ms: ms, error_type: ok ? null : `ecoute_${q.key}`,
         expected: { [q.key]: q.expected }, answer: { [q.key]: value } });
-      await next(z('feedback'), t('ex.next'));
+      await next(z('feedback'), t('ex.next'), { onReplay: ex.play });
     }
     return res;
   }
