@@ -139,6 +139,21 @@ function renderTabbar() {
 }
 window.addEventListener('hashchange', renderTabbar);
 
+// Ordinateur : si tous les liens ne tiennent pas à côté du titre, on les range
+// derrière le bouton « ☰ Menu » (sinon ils chevauchent « Music Progression Lab »)
+function fitNav() {
+  const header = document.querySelector('.site-header');
+  const links = document.getElementById('nav-links');
+  const brand = header?.querySelector('.brand');
+  if (!header || !links || !brand) return;
+  header.classList.remove('nav-compact');
+  if (getComputedStyle(links).position === 'absolute') return; // déjà replié (écran moyen ou téléphone)
+  const room = header.querySelector('.header-inner').clientWidth - brand.offsetWidth - 12;
+  header.classList.toggle('nav-compact', links.scrollWidth > room);
+}
+window.addEventListener('resize', fitNav);
+document.fonts?.ready.then(fitNav);
+
 function renderNav() {
   renderTabbar();
   const nav = document.getElementById('nav');
@@ -175,6 +190,7 @@ function renderNav() {
     toggle.setAttribute('aria-expanded', String(open));
   });
   links.addEventListener('click', (e) => { if (e.target.closest('a')) close(); });
+  fitNav();
   document.getElementById('logout-btn').addEventListener('click', async () => {
     close();
     await supabase.auth.signOut();
