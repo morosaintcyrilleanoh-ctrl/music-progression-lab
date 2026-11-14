@@ -504,7 +504,7 @@ h1, h2, h3 { color: inherit; }
   html { scroll-padding-bottom: 88px; }
   body { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
   .tabbar {
-    position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; display: grid; grid-template-columns: repeat(4, 1fr);
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; display: grid; grid-template-columns: repeat(5, 1fr);
     background: rgba(255, 255, 255, 0.97); border-top: 1px solid var(--border); padding-bottom: env(safe-area-inset-bottom);
     box-shadow: 0 -6px 20px rgba(11, 37, 69, 0.06);
   }
@@ -614,6 +614,15 @@ fieldset.field legend { font-weight: 700; margin-bottom: 4px; }
 .ear-key.black { position: absolute; top: 0; height: 60%; border: 0; border-radius: 0 0 6px 6px; background: linear-gradient(#1f2a44, #0b1220); z-index: 2; }
 .ear-key.white:active, .ear-key.white.is-hit { background: var(--blue-100); }
 .ear-key.black:active { background: var(--blue-strong); }
+/* Harmonie et accords : touches allumées (accord), choisies (élève), fausses */
+.ear-key.white.is-sel { background: var(--blue-100); }
+.ear-key.black.is-sel { background: #3b5bab; }
+.ear-key.white.is-on { background: var(--blue-strong); color: #fff; border-color: var(--blue-strong); }
+.ear-key.black.is-on { background: linear-gradient(#3b82f6, #1d4ed8); color: #fff; font-size: .58rem; font-weight: 800; letter-spacing: -0.02em; white-space: nowrap; overflow: visible; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 6px; }
+.ear-key.white.is-ko { background: #fee2e2; border-color: #dc2626; }
+.ear-key.black.is-ko { background: #dc2626; }
+.harm-lesson p { margin: 0 0 10px; line-height: 1.6; }
+.harm-lesson .btn.is-picked { border-color: var(--blue-strong); color: var(--blue-strong); }
 .ear-slots { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-bottom: 4px; }
 .ear-slot { min-width: 48px; padding: 8px 6px; border-radius: 10px; border: 2px dashed var(--border-strong); text-align: center; font-weight: 800; display: flex; flex-direction: column; }
 .ear-slot.is-filled { border-style: solid; border-color: var(--blue-100); background: var(--blue-50); }

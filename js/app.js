@@ -18,6 +18,7 @@ import { trainerPage, trainerStudentPage, trainerSolfegeCourse, trainerSolfegeSe
 import { solfegeSpacePage, solfegeCoursePage } from './pages/solfege-space.js';
 import { earHubPage, earActivityPage, earChallengePage, earExamsPage, earExamPage, earProgramPage, earProgramDayPage, earTunerPage } from './pages/ear-hub.js';
 import { libraryPage } from './pages/library.js';
+import { harmonyHubPage, harmonyLessonPage, chordsPage, chordsPracticePage } from './pages/harmony.js';
 import { getProfile, getMyTrainers, joinTrainer } from './data.js';
 import { syncSolfege } from './solfege-sync.js';
 import { icons } from './art.js';
@@ -54,6 +55,10 @@ route('/oreille/examen/:id', earExamPage, { auth: true });
 route('/oreille/programme/:slug', earProgramPage, { auth: true });
 route('/oreille/programme/:slug/:day', earProgramDayPage, { auth: true });
 route('/oreille/accordeur', earTunerPage, { auth: true });
+route('/harmonie', harmonyHubPage, { auth: true });
+route('/harmonie/lecon/:id', harmonyLessonPage, { auth: true });
+route('/accords', chordsPage, { auth: true });
+route('/accords/entrainement/:id', chordsPracticePage, { auth: true });
 route('/espace-solfege', solfegeSpacePage, { auth: true });
 route('/espace-solfege/formation/:id', solfegeCoursePage, { auth: true });
 route('/espace-solfege/formation/:id/:lesson', solfegeCoursePage, { auth: true });
@@ -107,11 +112,13 @@ function link(href, label) {
   return html`<a class="nav-link" href="${href}">${label}</a>`;
 }
 
-// ---------- Barre du bas (téléphone) : Accueil · Oreille · Solfège · Compte ----------
+// ---------- Barre du bas (téléphone) : Accueil · Oreille · Harmonie · Solfège · Compte ----------
+const HARMONY_PATHS = ['/harmonie', '/accords'];
 const EAR_PATHS = ['/oreille', '/programme', '/bibliotheque', '/seance', '/diagnostic', '/entrainement'];
 const ACCOUNT_PATHS = ['/tableau-de-bord', '/statistiques', '/cours', '/devoir', '/formateur', '/connexion', '/inscription', '/mot-de-passe-oublie', '/nouveau-mot-de-passe'];
 function tabFor(path) {
   if (path.startsWith('/espace-solfege')) return 'solfege';
+  if (HARMONY_PATHS.some((p) => path === p || path.startsWith(p + '/'))) return 'harmony';
   if (EAR_PATHS.some((p) => path === p || path.startsWith(p + '/'))) return 'ear';
   if (ACCOUNT_PATHS.some((p) => path === p || path.startsWith(p + '/'))) return 'account';
   return path === '/' ? 'home' : '';
@@ -126,6 +133,7 @@ function renderTabbar() {
   bar.innerHTML = String(html`
     ${item('home', '#/', icons.home, t('nav.home'))}
     ${item('ear', user ? '#/oreille' : '#/programme', icons.ear, t('nav.ear'))}
+    ${item('harmony', user ? '#/harmonie' : '#/connexion', icons.chords, t('nav.harmony'))}
     ${item('solfege', user ? '/solfege/' : '#/connexion?retour=solfege', icons.staff, t('nav.solfege'))}
     ${item('account', user ? '#/tableau-de-bord' : '#/connexion', icons.user, t('nav.account'))}`);
 }
@@ -149,6 +157,8 @@ function renderNav() {
       ${link('#/programme', t('nav.program'))}
       ${link('/solfege/', t('nav.solfege'))}
       ${link('#/oreille', t('nav.ear'))}
+      ${link('#/harmonie', t('nav.harmony'))}
+      ${link('#/accords', t('nav.chords'))}
       ${link('#/bibliotheque', t('nav.library'))}
       ${link('#/statistiques', t('nav.stats'))}
       ${link('#/cours', t('nav.course'))}

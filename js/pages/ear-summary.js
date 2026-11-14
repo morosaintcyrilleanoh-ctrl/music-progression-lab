@@ -5,6 +5,7 @@ import { t } from '../i18n.js';
 import { getEarResults, getProgramProgress } from '../data.js';
 import { ACTIVITIES } from '../ear/activities.js';
 import { PROGRAMS } from '../ear/programs.js';
+import { HARMONY_ACTIVITIES, harmonyText } from './harmony.js';
 
 const T = (k, v) => t('earp.' + k, v);
 const pct = (c, n) => (n ? Math.round((c / n) * 100) : 0);
@@ -21,7 +22,7 @@ export async function renderEarPlus(el, userId, { own = false } = {}) {
     return;
   }
   if (!document.contains(el)) return;
-  const acts = ACTIVITIES.map((a) => {
+  const acts = [...ACTIVITIES, ...HARMONY_ACTIVITIES].map((a) => {
     const list = rows.filter((r) => r.activity === a.id && r.kind !== 'examen');
     if (!list.length) return null;
     const c = list.reduce((x, r) => x + r.correct, 0), n = list.reduce((x, r) => x + r.total, 0);
@@ -29,7 +30,7 @@ export async function renderEarPlus(el, userId, { own = false } = {}) {
   }).filter(Boolean);
   const exams = rows.filter((r) => r.kind === 'examen');
   const defis = new Set(rows.filter((r) => r.kind === 'defi').map((r) => r.day));
-  const titleOf = (a) => T('act')[a.id]?.title ?? t('ear.modes')[a.earMode]?.title ?? a.id;
+  const titleOf = (a) => T('act')[a.id]?.title ?? harmonyText(a.id)?.title ?? t('ear.modes')[a.earMode]?.title ?? a.id;
   const programs = PROGRAMS.map((p) => ({ p, n: progress.filter((x) => x.program === p.slug).length })).filter((x) => x.n);
   if (!acts.length && !exams.length && !defis.size && !programs.length) {
     el.innerHTML = String(html`<h2 style="font-size:1.15rem">👂 ${T('title')}</h2>
