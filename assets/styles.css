@@ -89,9 +89,9 @@ h1:focus, h1:focus-visible { box-shadow: none; }
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
 }
-.site-header .container { max-width: 1340px; }
+.site-header .container { max-width: 1600px; }
 .header-inner { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 64px; }
-.brand { display: flex; align-items: center; gap: 10px; white-space: nowrap; color: var(--text); text-decoration: none; font-weight: 600; font-size: 1rem; }
+.brand { display: flex; align-items: center; gap: 10px; white-space: nowrap; flex-shrink: 0; color: var(--text); text-decoration: none; font-weight: 600; font-size: 1rem; }
 .brand strong { color: var(--blue-strong); }
 #nav { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
 .nav-link {
@@ -363,6 +363,8 @@ details.card summary { cursor: pointer; min-height: 32px; }
    ===================================================================== */
 .nav-links { display: flex; gap: 4px; align-items: center; }
 .nav-toggle { display: none; }
+/* Menu replié derrière « ☰ Menu » : écrans moyens, ou dès que les liens ne tiennent
+   pas à côté du titre (classe nav-compact posée par js/app.js après mesure) */
 @media (max-width: 1320px) {
   .nav-toggle { display: inline-flex; }
   .nav-links {
@@ -373,6 +375,14 @@ details.card summary { cursor: pointer; min-height: 32px; }
   .nav-links .nav-link { padding: 12px 14px; font-size: 1rem; }
   .nav-links .btn { justify-content: center; }
 }
+.site-header.nav-compact .nav-toggle { display: inline-flex; }
+.site-header.nav-compact .nav-links {
+  display: none; position: absolute; top: 64px; right: 12px; left: 12px; flex-direction: column; align-items: stretch;
+  padding: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 16px 40px rgba(11, 37, 69, 0.16);
+}
+.site-header.nav-compact .nav-links.is-open { display: flex; }
+.site-header.nav-compact .nav-links .nav-link { padding: 12px 14px; font-size: 1rem; }
+.site-header.nav-compact .nav-links .btn { justify-content: center; }
 
 /* ---------- Divers communs ---------- */
 .dash-inner { display: grid; gap: 20px; }
